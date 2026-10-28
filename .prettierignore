@@ -1,0 +1,19 @@
+# External dependencies and bundled runtimes.
+node_modules/
+runtime/
+
+# User/project data rather than application source.
+maps.json
+state.json
+saves/
+
+# Binary and generated build artifacts.
+*.exe
+*.dll
+*.so
+*.dylib
+*.zip
+*.png
+*.jpg
+*.jpeg
+*.ico

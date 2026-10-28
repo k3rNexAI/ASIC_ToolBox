@@ -1,5 +1,5 @@
 /* ASIC ToolBox themes: the original palette remains the unmodified default. */
-html[data-theme="soft-dark"] {
+html[data-theme='soft-dark'] {
   color-scheme: dark;
   --bg: #282f38;
   --panel: #313a44;
@@ -28,7 +28,7 @@ html[data-theme="soft-dark"] {
   --theme-unknown-border: #526675;
 }
 
-html[data-theme="mist-sage"] {
+html[data-theme='mist-sage'] {
   color-scheme: light;
   --bg: #edf1f1;
   --panel: #f9fbfa;
@@ -57,240 +57,580 @@ html[data-theme="mist-sage"] {
   --theme-unknown-border: #c8d7dc;
 }
 
-html[data-theme="soft-dark"], html[data-theme="mist-sage"] {
+html[data-theme='soft-dark'],
+html[data-theme='mist-sage'] {
   color: var(--text);
   background: var(--bg);
 }
-html[data-theme="soft-dark"] body, html[data-theme="mist-sage"] body {
+html[data-theme='soft-dark'] body,
+html[data-theme='mist-sage'] body {
   color: var(--text);
   background: var(--bg);
 }
-html[data-theme="soft-dark"] .rail, html[data-theme="mist-sage"] .rail {
+html[data-theme='soft-dark'] .rail,
+html[data-theme='mist-sage'] .rail {
   background: var(--theme-rail);
   border-color: var(--line);
 }
-html[data-theme="soft-dark"] .rail-label, html[data-theme="soft-dark"] .eyebrow,
-html[data-theme="mist-sage"] .rail-label, html[data-theme="mist-sage"] .eyebrow {
+html[data-theme='soft-dark'] .rail-label,
+html[data-theme='soft-dark'] .eyebrow,
+html[data-theme='mist-sage'] .rail-label,
+html[data-theme='mist-sage'] .eyebrow {
   color: var(--muted);
 }
-html[data-theme="soft-dark"] .rail-link, html[data-theme="mist-sage"] .rail-link {
+html[data-theme='soft-dark'] .rail-link,
+html[data-theme='mist-sage'] .rail-link {
   color: var(--muted);
 }
-html[data-theme="soft-dark"] .rail-link:hover, html[data-theme="mist-sage"] .rail-link:hover {
+html[data-theme='soft-dark'] .rail-link:hover,
+html[data-theme='mist-sage'] .rail-link:hover {
   color: var(--text);
   background: var(--theme-hover);
   border-color: var(--line);
 }
-html[data-theme="soft-dark"] .rail-link.active, html[data-theme="mist-sage"] .rail-link.active {
+html[data-theme='soft-dark'] .rail-link.active,
+html[data-theme='mist-sage'] .rail-link.active {
   color: var(--text);
   background: var(--theme-hover);
   border-color: var(--line);
 }
-html[data-theme="soft-dark"] .rail-link span, html[data-theme="mist-sage"] .rail-link span,
-html[data-theme="soft-dark"] .rail-link.active span, html[data-theme="mist-sage"] .rail-link.active span {
+html[data-theme='soft-dark'] .rail-link span,
+html[data-theme='mist-sage'] .rail-link span,
+html[data-theme='soft-dark'] .rail-link.active span,
+html[data-theme='mist-sage'] .rail-link.active span {
   color: var(--cyan);
 }
-html[data-theme="soft-dark"] .rail-footer, html[data-theme="mist-sage"] .rail-footer,
-html[data-theme="soft-dark"] .brand span, html[data-theme="mist-sage"] .brand span {
+html[data-theme='soft-dark'] .rail-footer,
+html[data-theme='mist-sage'] .rail-footer,
+html[data-theme='soft-dark'] .brand span,
+html[data-theme='mist-sage'] .brand span {
   color: var(--muted);
 }
 
-html[data-theme="soft-dark"] :is(.panel, .hero-card, .stat-card, .cod-card, .scan-summary, .summary-item, .board-control-panel, .board-control-note, .recipient-control-list, .control-device, .board-model-group, .selectable-device, .monitor-panel, .monitor-device, .map-toolbar, .map-grid, .fleet-cod, .rack, .rack-map .rack, .cod-check-list, .cod-check, .cod-check-all, .fleet-total, .red-device-card, .manual-defect-registry, .map-defect-form, .guide-section, .guide-hero, .scan-settings-section, .scan-protocol-card) {
+html[data-theme='soft-dark']
+  :is(
+    .panel,
+    .hero-card,
+    .stat-card,
+    .cod-card,
+    .scan-summary,
+    .summary-item,
+    .board-control-panel,
+    .board-control-note,
+    .recipient-control-list,
+    .control-device,
+    .board-model-group,
+    .selectable-device,
+    .monitor-panel,
+    .monitor-device,
+    .map-toolbar,
+    .map-grid,
+    .fleet-cod,
+    .rack,
+    .rack-map .rack,
+    .cod-check-list,
+    .cod-check,
+    .cod-check-all,
+    .fleet-total,
+    .red-device-card,
+    .manual-defect-registry,
+    .map-defect-form,
+    .guide-section,
+    .guide-hero,
+    .scan-settings-section,
+    .scan-protocol-card
+  ) {
   color: var(--text);
   background: var(--panel);
   border-color: var(--line);
 }
-html[data-theme="mist-sage"] :is(.panel, .hero-card, .stat-card, .cod-card, .scan-summary, .summary-item, .board-control-panel, .board-control-note, .recipient-control-list, .control-device, .board-model-group, .selectable-device, .monitor-panel, .monitor-device, .map-toolbar, .map-grid, .fleet-cod, .rack, .rack-map .rack, .cod-check-list, .cod-check, .cod-check-all, .fleet-total, .red-device-card, .manual-defect-registry, .map-defect-form, .guide-section, .guide-hero, .scan-settings-section, .scan-protocol-card) {
+html[data-theme='mist-sage']
+  :is(
+    .panel,
+    .hero-card,
+    .stat-card,
+    .cod-card,
+    .scan-summary,
+    .summary-item,
+    .board-control-panel,
+    .board-control-note,
+    .recipient-control-list,
+    .control-device,
+    .board-model-group,
+    .selectable-device,
+    .monitor-panel,
+    .monitor-device,
+    .map-toolbar,
+    .map-grid,
+    .fleet-cod,
+    .rack,
+    .rack-map .rack,
+    .cod-check-list,
+    .cod-check,
+    .cod-check-all,
+    .fleet-total,
+    .red-device-card,
+    .manual-defect-registry,
+    .map-defect-form,
+    .guide-section,
+    .guide-hero,
+    .scan-settings-section,
+    .scan-protocol-card
+  ) {
   color: var(--text);
   background: var(--panel);
   border-color: var(--line);
 }
-html[data-theme="soft-dark"] :is(.stat-card, .cod-card, .summary-item, .control-device, .board-model-group, .selectable-device, .monitor-device, .fleet-cod, .cod-check, .cod-check-all, .scan-settings-section, .scan-protocol-card),
-html[data-theme="mist-sage"] :is(.stat-card, .cod-card, .summary-item, .control-device, .board-model-group, .selectable-device, .monitor-device, .fleet-cod, .cod-check, .cod-check-all, .scan-settings-section, .scan-protocol-card) {
+html[data-theme='soft-dark']
+  :is(
+    .stat-card,
+    .cod-card,
+    .summary-item,
+    .control-device,
+    .board-model-group,
+    .selectable-device,
+    .monitor-device,
+    .fleet-cod,
+    .cod-check,
+    .cod-check-all,
+    .scan-settings-section,
+    .scan-protocol-card
+  ),
+html[data-theme='mist-sage']
+  :is(
+    .stat-card,
+    .cod-card,
+    .summary-item,
+    .control-device,
+    .board-model-group,
+    .selectable-device,
+    .monitor-device,
+    .fleet-cod,
+    .cod-check,
+    .cod-check-all,
+    .scan-settings-section,
+    .scan-protocol-card
+  ) {
   background: var(--theme-surface-raised);
 }
-html[data-theme="soft-dark"] .hero-card, html[data-theme="mist-sage"] .hero-card,
-html[data-theme="soft-dark"] .scan-panel, html[data-theme="mist-sage"] .scan-panel,
-html[data-theme="soft-dark"] .board-control-panel, html[data-theme="mist-sage"] .board-control-panel {
+html[data-theme='soft-dark'] .hero-card,
+html[data-theme='mist-sage'] .hero-card,
+html[data-theme='soft-dark'] .scan-panel,
+html[data-theme='mist-sage'] .scan-panel,
+html[data-theme='soft-dark'] .board-control-panel,
+html[data-theme='mist-sage'] .board-control-panel {
   background-image: none;
 }
-html[data-theme="soft-dark"] .board-control-note, html[data-theme="mist-sage"] .board-control-note,
-html[data-theme="soft-dark"] .protocol-controls, html[data-theme="mist-sage"] .protocol-controls,
-html[data-theme="soft-dark"] .protocol-toggle, html[data-theme="mist-sage"] .protocol-toggle,
-html[data-theme="soft-dark"] .monitor-row, html[data-theme="mist-sage"] .monitor-row,
-html[data-theme="soft-dark"] .map-board-row, html[data-theme="mist-sage"] .map-board-row,
-html[data-theme="soft-dark"] .map-nopic, html[data-theme="mist-sage"] .map-nopic,
-html[data-theme="soft-dark"] .role-device, html[data-theme="mist-sage"] .role-device,
-html[data-theme="soft-dark"] .scan-settings, html[data-theme="mist-sage"] .scan-settings {
+html[data-theme='soft-dark'] .board-control-note,
+html[data-theme='mist-sage'] .board-control-note,
+html[data-theme='soft-dark'] .protocol-controls,
+html[data-theme='mist-sage'] .protocol-controls,
+html[data-theme='soft-dark'] .protocol-toggle,
+html[data-theme='mist-sage'] .protocol-toggle,
+html[data-theme='soft-dark'] .monitor-row,
+html[data-theme='mist-sage'] .monitor-row,
+html[data-theme='soft-dark'] .map-board-row,
+html[data-theme='mist-sage'] .map-board-row,
+html[data-theme='soft-dark'] .map-nopic,
+html[data-theme='mist-sage'] .map-nopic,
+html[data-theme='soft-dark'] .role-device,
+html[data-theme='mist-sage'] .role-device,
+html[data-theme='soft-dark'] .scan-settings,
+html[data-theme='mist-sage'] .scan-settings {
   color: var(--text);
   background: var(--theme-surface-raised);
   border-color: var(--line);
 }
-html[data-theme="soft-dark"] :is(.top-meta, .section-description, .brand span, .rail-label, .section-head small, .form-help, .scan-caption, .protocol-note, .board-control-note, .guide-section p, .guide-section figcaption),
-html[data-theme="mist-sage"] :is(.top-meta, .section-description, .brand span, .rail-label, .section-head small, .form-help, .scan-caption, .protocol-note, .board-control-note, .guide-section p, .guide-section figcaption) {
+html[data-theme='soft-dark']
+  :is(
+    .top-meta,
+    .section-description,
+    .brand span,
+    .rail-label,
+    .section-head small,
+    .form-help,
+    .scan-caption,
+    .protocol-note,
+    .board-control-note,
+    .guide-section p,
+    .guide-section figcaption
+  ),
+html[data-theme='mist-sage']
+  :is(
+    .top-meta,
+    .section-description,
+    .brand span,
+    .rail-label,
+    .section-head small,
+    .form-help,
+    .scan-caption,
+    .protocol-note,
+    .board-control-note,
+    .guide-section p,
+    .guide-section figcaption
+  ) {
   color: var(--muted);
 }
 
-html[data-theme="soft-dark"] :is(input, select, textarea), html[data-theme="mist-sage"] :is(input, select, textarea) {
+html[data-theme='soft-dark'] :is(input, select, textarea),
+html[data-theme='mist-sage'] :is(input, select, textarea) {
   color: var(--text);
   background: var(--theme-input);
   border-color: var(--line);
 }
-html[data-theme="mist-sage"] :is(input, select, textarea) {
+html[data-theme='mist-sage'] :is(input, select, textarea) {
   color-scheme: light;
 }
-html[data-theme="soft-dark"] input::placeholder, html[data-theme="mist-sage"] input::placeholder,
-html[data-theme="soft-dark"] textarea::placeholder, html[data-theme="mist-sage"] textarea::placeholder {
+html[data-theme='soft-dark'] input::placeholder,
+html[data-theme='mist-sage'] input::placeholder,
+html[data-theme='soft-dark'] textarea::placeholder,
+html[data-theme='mist-sage'] textarea::placeholder {
   color: var(--muted);
-  opacity: .82;
+  opacity: 0.82;
 }
-html[data-theme="soft-dark"] .button.primary, html[data-theme="mist-sage"] .button.primary {
+html[data-theme='soft-dark'] .button.primary,
+html[data-theme='mist-sage'] .button.primary {
   background: var(--cyan);
   border-color: var(--cyan);
   color: var(--theme-accent-text);
 }
-html[data-theme="soft-dark"] .button.secondary, html[data-theme="mist-sage"] .button.secondary,
-html[data-theme="soft-dark"] .button.scan, html[data-theme="mist-sage"] .button.scan,
-html[data-theme="soft-dark"] .map-resume-device, html[data-theme="mist-sage"] .map-resume-device,
-html[data-theme="soft-dark"] .map-add-defect, html[data-theme="mist-sage"] .map-add-defect {
+html[data-theme='soft-dark'] .button.secondary,
+html[data-theme='mist-sage'] .button.secondary,
+html[data-theme='soft-dark'] .button.scan,
+html[data-theme='mist-sage'] .button.scan,
+html[data-theme='soft-dark'] .map-resume-device,
+html[data-theme='mist-sage'] .map-resume-device,
+html[data-theme='soft-dark'] .map-add-defect,
+html[data-theme='mist-sage'] .map-add-defect {
   color: var(--text);
   background: var(--theme-surface-raised);
   border-color: var(--line);
 }
-html[data-theme="soft-dark"] .button:hover, html[data-theme="mist-sage"] .button:hover {
-  filter: brightness(.97);
+html[data-theme='soft-dark'] .button:hover,
+html[data-theme='mist-sage'] .button:hover {
+  filter: brightness(0.97);
 }
-html[data-theme="soft-dark"] .pill, html[data-theme="soft-dark"] .scope-badge,
-html[data-theme="mist-sage"] .pill, html[data-theme="mist-sage"] .scope-badge {
+html[data-theme='soft-dark'] .pill,
+html[data-theme='soft-dark'] .scope-badge,
+html[data-theme='mist-sage'] .pill,
+html[data-theme='mist-sage'] .scope-badge {
   color: var(--cyan);
   background: var(--theme-surface-raised);
   border-color: var(--line);
 }
-html[data-theme="soft-dark"] .scan-state, html[data-theme="mist-sage"] .scan-state,
-html[data-theme="soft-dark"] .toast, html[data-theme="mist-sage"] .toast,
-html[data-theme="soft-dark"] dialog, html[data-theme="mist-sage"] dialog {
+html[data-theme='soft-dark'] .scan-state,
+html[data-theme='mist-sage'] .scan-state,
+html[data-theme='soft-dark'] .toast,
+html[data-theme='mist-sage'] .toast,
+html[data-theme='soft-dark'] dialog,
+html[data-theme='mist-sage'] dialog {
   color: var(--text);
   background: var(--panel);
   border-color: var(--line);
 }
-html[data-theme="soft-dark"] dialog::backdrop, html[data-theme="mist-sage"] dialog::backdrop {
-  background: rgba(20, 28, 33, .46);
+html[data-theme='soft-dark'] dialog::backdrop,
+html[data-theme='mist-sage'] dialog::backdrop {
+  background: rgba(20, 28, 33, 0.46);
 }
 
 /* Status colors retain meaning but become softer and less saturated. */
-html[data-theme="soft-dark"] :is(.map-cell.healthy, .map-device.healthy, .fleet-chip.healthy, .legend.healthy, .board-line:not(.bad), .status-chip.good) {
+html[data-theme='soft-dark']
+  :is(
+    .map-cell.healthy,
+    .map-device.healthy,
+    .fleet-chip.healthy,
+    .legend.healthy,
+    .board-line:not(.bad),
+    .status-chip.good
+  ) {
   color: #b8dac8;
   background: var(--theme-ok-bg);
   border-color: var(--theme-ok-border);
 }
-html[data-theme="mist-sage"] :is(.map-cell.healthy, .map-device.healthy, .fleet-chip.healthy, .legend.healthy, .board-line:not(.bad), .status-chip.good) {
+html[data-theme='mist-sage']
+  :is(
+    .map-cell.healthy,
+    .map-device.healthy,
+    .fleet-chip.healthy,
+    .legend.healthy,
+    .board-line:not(.bad),
+    .status-chip.good
+  ) {
   color: #376a52;
   background: var(--theme-ok-bg);
   border-color: var(--theme-ok-border);
 }
-html[data-theme="soft-dark"] :is(.map-cell.degraded, .map-device.degraded, .fleet-chip.degraded, .legend.degraded, .status-chip.warn) {
+html[data-theme='soft-dark']
+  :is(
+    .map-cell.degraded,
+    .map-device.degraded,
+    .fleet-chip.degraded,
+    .legend.degraded,
+    .status-chip.warn
+  ) {
   color: #e1cf9e;
   background: var(--theme-warn-bg);
   border-color: var(--theme-warn-border);
 }
-html[data-theme="mist-sage"] :is(.map-cell.degraded, .map-device.degraded, .fleet-chip.degraded, .legend.degraded, .status-chip.warn) {
+html[data-theme='mist-sage']
+  :is(
+    .map-cell.degraded,
+    .map-device.degraded,
+    .fleet-chip.degraded,
+    .legend.degraded,
+    .status-chip.warn
+  ) {
   color: #806536;
   background: var(--theme-warn-bg);
   border-color: var(--theme-warn-border);
 }
-html[data-theme="soft-dark"] :is(.map-cell.check, .map-device.check, .fleet-chip.check, .legend.check, .board-line.bad, .status-chip.bad, .error-log, .unpin-red-device) {
+html[data-theme='soft-dark']
+  :is(
+    .map-cell.check,
+    .map-device.check,
+    .fleet-chip.check,
+    .legend.check,
+    .board-line.bad,
+    .status-chip.bad,
+    .error-log,
+    .unpin-red-device
+  ) {
   color: #e5b1a8;
   background: var(--theme-fault-bg);
   border-color: var(--theme-fault-border);
 }
-html[data-theme="mist-sage"] :is(.map-cell.check, .map-device.check, .fleet-chip.check, .legend.check, .board-line.bad, .status-chip.bad, .error-log, .unpin-red-device) {
+html[data-theme='mist-sage']
+  :is(
+    .map-cell.check,
+    .map-device.check,
+    .fleet-chip.check,
+    .legend.check,
+    .board-line.bad,
+    .status-chip.bad,
+    .error-log,
+    .unpin-red-device
+  ) {
   color: #8c4b45;
   background: var(--theme-fault-bg);
   border-color: var(--theme-fault-border);
 }
-html[data-theme="soft-dark"] :is(.map-cell.offline, .map-device.offline, .fleet-chip.offline, .legend.offline) {
+html[data-theme='soft-dark']
+  :is(.map-cell.offline, .map-device.offline, .fleet-chip.offline, .legend.offline) {
   color: #c3c9cd;
   background: var(--theme-offline-bg);
   border-color: var(--theme-offline-border);
 }
-html[data-theme="mist-sage"] :is(.map-cell.offline, .map-device.offline, .fleet-chip.offline, .legend.offline) {
+html[data-theme='mist-sage']
+  :is(.map-cell.offline, .map-device.offline, .fleet-chip.offline, .legend.offline) {
   color: #5f6b70;
   background: var(--theme-offline-bg);
   border-color: var(--theme-offline-border);
 }
-html[data-theme="soft-dark"] :is(.map-cell.unknown, .map-device.unknown, .legend.empty, .map-device.empty) {
+html[data-theme='soft-dark']
+  :is(.map-cell.unknown, .map-device.unknown, .legend.empty, .map-device.empty) {
   color: #c5d0d4;
   background: var(--theme-unknown-bg);
   border-color: var(--theme-unknown-border);
 }
-html[data-theme="mist-sage"] :is(.map-cell.unknown, .map-device.unknown, .legend.empty, .map-device.empty) {
+html[data-theme='mist-sage']
+  :is(.map-cell.unknown, .map-device.unknown, .legend.empty, .map-device.empty) {
   color: #52676d;
   background: var(--theme-unknown-bg);
   border-color: var(--theme-unknown-border);
 }
-html[data-theme="soft-dark"] :is(.fleet-table .t-green, .t-green, .recovered-global-list>header strong, .recovered-green-chip) { color: #a8d8bf; }
-html[data-theme="mist-sage"] :is(.fleet-table .t-green, .t-green, .recovered-global-list>header strong, .recovered-green-chip) { color: #397756; }
-html[data-theme="soft-dark"] :is(.fleet-table .t-yellow, .t-yellow) { color: #dfcb98; }
-html[data-theme="mist-sage"] :is(.fleet-table .t-yellow, .t-yellow) { color: #886b37; }
-html[data-theme="soft-dark"] :is(.fleet-table .t-red, .t-red) { color: #e0aaa3; }
-html[data-theme="mist-sage"] :is(.fleet-table .t-red, .t-red) { color: #a55550; }
+html[data-theme='soft-dark']
+  :is(
+    .fleet-table .t-green,
+    .t-green,
+    .recovered-global-list > header strong,
+    .recovered-green-chip
+  ) {
+  color: #a8d8bf;
+}
+html[data-theme='mist-sage']
+  :is(
+    .fleet-table .t-green,
+    .t-green,
+    .recovered-global-list > header strong,
+    .recovered-green-chip
+  ) {
+  color: #397756;
+}
+html[data-theme='soft-dark'] :is(.fleet-table .t-yellow, .t-yellow) {
+  color: #dfcb98;
+}
+html[data-theme='mist-sage'] :is(.fleet-table .t-yellow, .t-yellow) {
+  color: #886b37;
+}
+html[data-theme='soft-dark'] :is(.fleet-table .t-red, .t-red) {
+  color: #e0aaa3;
+}
+html[data-theme='mist-sage'] :is(.fleet-table .t-red, .t-red) {
+  color: #a55550;
+}
 
 /* Logs stay readable without black wells; timestamps and messages remain distinct. */
-html[data-theme="soft-dark"] :is(.red-errors-window, .monitor-log, .map-errors, .monitor-row-logs, .map-defect-form textarea, .map-defect-form input[name="defect"]) {
+html[data-theme='soft-dark']
+  :is(
+    .red-errors-window,
+    .monitor-log,
+    .map-errors,
+    .monitor-row-logs,
+    .map-defect-form textarea,
+    .map-defect-form input[name='defect']
+  ) {
   color: #e2e7e9;
   background: #252d36;
   border-color: var(--line);
 }
-html[data-theme="mist-sage"] :is(.red-errors-window, .monitor-log, .map-errors, .monitor-row-logs, .map-defect-form textarea, .map-defect-form input[name="defect"]) {
+html[data-theme='mist-sage']
+  :is(
+    .red-errors-window,
+    .monitor-log,
+    .map-errors,
+    .monitor-row-logs,
+    .map-defect-form textarea,
+    .map-defect-form input[name='defect']
+  ) {
   color: #34454a;
   background: #f1f5f3;
   border-color: var(--line);
 }
-html[data-theme="soft-dark"] :is(.map-log-time, .monitor-row-logs .map-log-time) { color: #a8c4d6; }
-html[data-theme="mist-sage"] :is(.map-log-time, .monitor-row-logs .map-log-time) { color: #56768b; }
-html[data-theme="soft-dark"] .map-log-message { color: #e0e5e6; }
-html[data-theme="mist-sage"] .map-log-message { color: #38494e; }
-html[data-theme="soft-dark"] :is(.map-log-marker, .monitor-row-logs .map-log-marker) { color: #dda19b; }
-html[data-theme="mist-sage"] :is(.map-log-marker, .monitor-row-logs .map-log-marker) { color: #ad625c; }
-html[data-theme="soft-dark"] .map-log-entry.expanded { background: #453a3b; }
-html[data-theme="mist-sage"] .map-log-entry.expanded { background: #f5e8e5; }
-html[data-theme="soft-dark"] .map-errors::-webkit-scrollbar-track { background: #29333c; }
-html[data-theme="soft-dark"] .map-errors::-webkit-scrollbar-thumb { background: #59656d; }
-html[data-theme="mist-sage"] .map-errors::-webkit-scrollbar-track { background: #e0e8e5; }
-html[data-theme="mist-sage"] .map-errors::-webkit-scrollbar-thumb { background: #bccbc5; }
+html[data-theme='soft-dark'] :is(.map-log-time, .monitor-row-logs .map-log-time) {
+  color: #a8c4d6;
+}
+html[data-theme='mist-sage'] :is(.map-log-time, .monitor-row-logs .map-log-time) {
+  color: #56768b;
+}
+html[data-theme='soft-dark'] .map-log-message {
+  color: #e0e5e6;
+}
+html[data-theme='mist-sage'] .map-log-message {
+  color: #38494e;
+}
+html[data-theme='soft-dark'] :is(.map-log-marker, .monitor-row-logs .map-log-marker) {
+  color: #dda19b;
+}
+html[data-theme='mist-sage'] :is(.map-log-marker, .monitor-row-logs .map-log-marker) {
+  color: #ad625c;
+}
+html[data-theme='soft-dark'] .map-log-entry.expanded {
+  background: #453a3b;
+}
+html[data-theme='mist-sage'] .map-log-entry.expanded {
+  background: #f5e8e5;
+}
+html[data-theme='soft-dark'] .map-errors::-webkit-scrollbar-track {
+  background: #29333c;
+}
+html[data-theme='soft-dark'] .map-errors::-webkit-scrollbar-thumb {
+  background: #59656d;
+}
+html[data-theme='mist-sage'] .map-errors::-webkit-scrollbar-track {
+  background: #e0e8e5;
+}
+html[data-theme='mist-sage'] .map-errors::-webkit-scrollbar-thumb {
+  background: #bccbc5;
+}
 
-html[data-theme="soft-dark"] :is(.map-board-row, .map-board-row.working, .map-board-row.fault) { background: var(--theme-surface-raised); border-color: var(--line); }
-html[data-theme="mist-sage"] :is(.map-board-row, .map-board-row.working, .map-board-row.fault) { background: var(--theme-surface-raised); border-color: var(--line); }
-html[data-theme="soft-dark"] .map-temperatures, html[data-theme="soft-dark"] .sensor-chip, html[data-theme="soft-dark"] .fan-chip,
-html[data-theme="mist-sage"] .map-temperatures, html[data-theme="mist-sage"] .sensor-chip, html[data-theme="mist-sage"] .fan-chip {
+html[data-theme='soft-dark'] :is(.map-board-row, .map-board-row.working, .map-board-row.fault) {
+  background: var(--theme-surface-raised);
+  border-color: var(--line);
+}
+html[data-theme='mist-sage'] :is(.map-board-row, .map-board-row.working, .map-board-row.fault) {
+  background: var(--theme-surface-raised);
+  border-color: var(--line);
+}
+html[data-theme='soft-dark'] .map-temperatures,
+html[data-theme='soft-dark'] .sensor-chip,
+html[data-theme='soft-dark'] .fan-chip,
+html[data-theme='mist-sage'] .map-temperatures,
+html[data-theme='mist-sage'] .sensor-chip,
+html[data-theme='mist-sage'] .fan-chip {
   color: var(--text);
   background: var(--theme-surface-raised);
   border-color: var(--line);
 }
-html[data-theme="soft-dark"] .map-defect-form input[name="defect"], html[data-theme="soft-dark"] .map-defect-form textarea,
-html[data-theme="mist-sage"] .map-defect-form input[name="defect"], html[data-theme="mist-sage"] .map-defect-form textarea {
+html[data-theme='soft-dark'] .map-defect-form input[name='defect'],
+html[data-theme='soft-dark'] .map-defect-form textarea,
+html[data-theme='mist-sage'] .map-defect-form input[name='defect'],
+html[data-theme='mist-sage'] .map-defect-form textarea {
   color: var(--text);
   background: var(--theme-input);
 }
-html[data-theme="soft-dark"] .manual-defect-row button, html[data-theme="soft-dark"] .remove-manual-defect { color: #e0aaa3; }
-html[data-theme="mist-sage"] .manual-defect-row button, html[data-theme="mist-sage"] .remove-manual-defect { color: #a55550; }
-html[data-theme="soft-dark"] .map-scan-progress-track, html[data-theme="mist-sage"] .map-scan-progress-track { background: var(--theme-surface-raised); }
-html[data-theme="soft-dark"] .map-scan-progress-meta, html[data-theme="mist-sage"] .map-scan-progress-meta { color: var(--muted); }
-html[data-theme="soft-dark"] .guide-toc a, html[data-theme="mist-sage"] .guide-toc a { color: var(--text); border-color: var(--line); }
-html[data-theme="soft-dark"] .guide-toc a:hover, html[data-theme="soft-dark"] .guide-toc a.current,
-html[data-theme="mist-sage"] .guide-toc a:hover, html[data-theme="mist-sage"] .guide-toc a.current { color: var(--text); background: var(--theme-hover); border-color: var(--line); }
-html[data-theme="soft-dark"] .guide-callout, html[data-theme="mist-sage"] .guide-callout { color: var(--text); background: var(--theme-surface-raised); border-color: var(--line); }
-html[data-theme="soft-dark"] .guide-callout strong, html[data-theme="mist-sage"] .guide-callout strong { color: var(--cyan); }
-html[data-theme="soft-dark"] .guide-section figure img, html[data-theme="mist-sage"] .guide-section figure img { background: var(--theme-surface-raised); border-color: var(--line); }
-html[data-theme="mist-sage"] .cod-red-devices, html[data-theme="mist-sage"] .cod-red-summary,
-html[data-theme="mist-sage"] .red-device-card .map-nopic { background: #f7efed; border-color: #e5cfca; }
-html[data-theme="soft-dark"] .cod-red-devices, html[data-theme="soft-dark"] .cod-red-summary,
-html[data-theme="soft-dark"] .red-device-card .map-nopic { background: #3f3437; border-color: #695052; }
-html[data-theme="soft-dark"] .map-nopic, html[data-theme="mist-sage"] .map-nopic { color: var(--text); }
-html[data-theme="soft-dark"] .rail-ec, html[data-theme="mist-sage"] .rail-ec { background: var(--theme-surface-raised); border-color: var(--line); }
-html[data-theme="soft-dark"] .rail-cod:hover, html[data-theme="mist-sage"] .rail-cod:hover,
-html[data-theme="soft-dark"] .rail-cod.selected, html[data-theme="mist-sage"] .rail-cod.selected { background: var(--theme-hover); }
-html[data-theme="soft-dark"] .theme-picker, html[data-theme="mist-sage"] .theme-picker {
+html[data-theme='soft-dark'] .manual-defect-row button,
+html[data-theme='soft-dark'] .remove-manual-defect {
+  color: #e0aaa3;
+}
+html[data-theme='mist-sage'] .manual-defect-row button,
+html[data-theme='mist-sage'] .remove-manual-defect {
+  color: #a55550;
+}
+html[data-theme='soft-dark'] .map-scan-progress-track,
+html[data-theme='mist-sage'] .map-scan-progress-track {
+  background: var(--theme-surface-raised);
+}
+html[data-theme='soft-dark'] .map-scan-progress-meta,
+html[data-theme='mist-sage'] .map-scan-progress-meta {
+  color: var(--muted);
+}
+html[data-theme='soft-dark'] .guide-toc a,
+html[data-theme='mist-sage'] .guide-toc a {
+  color: var(--text);
+  border-color: var(--line);
+}
+html[data-theme='soft-dark'] .guide-toc a:hover,
+html[data-theme='soft-dark'] .guide-toc a.current,
+html[data-theme='mist-sage'] .guide-toc a:hover,
+html[data-theme='mist-sage'] .guide-toc a.current {
+  color: var(--text);
+  background: var(--theme-hover);
+  border-color: var(--line);
+}
+html[data-theme='soft-dark'] .guide-callout,
+html[data-theme='mist-sage'] .guide-callout {
+  color: var(--text);
+  background: var(--theme-surface-raised);
+  border-color: var(--line);
+}
+html[data-theme='soft-dark'] .guide-callout strong,
+html[data-theme='mist-sage'] .guide-callout strong {
+  color: var(--cyan);
+}
+html[data-theme='soft-dark'] .guide-section figure img,
+html[data-theme='mist-sage'] .guide-section figure img {
+  background: var(--theme-surface-raised);
+  border-color: var(--line);
+}
+html[data-theme='mist-sage'] .cod-red-devices,
+html[data-theme='mist-sage'] .cod-red-summary,
+html[data-theme='mist-sage'] .red-device-card .map-nopic {
+  background: #f7efed;
+  border-color: #e5cfca;
+}
+html[data-theme='soft-dark'] .cod-red-devices,
+html[data-theme='soft-dark'] .cod-red-summary,
+html[data-theme='soft-dark'] .red-device-card .map-nopic {
+  background: #3f3437;
+  border-color: #695052;
+}
+html[data-theme='soft-dark'] .map-nopic,
+html[data-theme='mist-sage'] .map-nopic {
+  color: var(--text);
+}
+html[data-theme='soft-dark'] .rail-ec,
+html[data-theme='mist-sage'] .rail-ec {
+  background: var(--theme-surface-raised);
+  border-color: var(--line);
+}
+html[data-theme='soft-dark'] .rail-cod:hover,
+html[data-theme='mist-sage'] .rail-cod:hover,
+html[data-theme='soft-dark'] .rail-cod.selected,
+html[data-theme='mist-sage'] .rail-cod.selected {
+  background: var(--theme-hover);
+}
+html[data-theme='soft-dark'] .theme-picker,
+html[data-theme='mist-sage'] .theme-picker {
   color: var(--muted);
   background: var(--theme-surface-raised);
   border-color: var(--line);
@@ -308,7 +648,7 @@ html[data-theme="soft-dark"] .theme-picker, html[data-theme="mist-sage"] .theme-
   color: var(--muted);
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: .12em;
+  letter-spacing: 0.12em;
 }
 .theme-picker select {
   width: 100%;
@@ -322,168 +662,204 @@ html[data-theme="soft-dark"] .theme-picker, html[data-theme="mist-sage"] .theme-
 }
 
 @media (max-width: 760px) {
-  .theme-picker { margin: 8px 0; padding: 8px; }
-  .theme-picker label { font-size: 8px; }
+  .theme-picker {
+    margin: 8px 0;
+    padding: 8px;
+  }
+  .theme-picker label {
+    font-size: 8px;
+  }
 }
 
 /* Base map tiles and data tables use the same calm surface hierarchy. */
-html[data-theme="soft-dark"] :is(.map-cell, .map-device, .rack-map .map-device, .rack-map .shelf, .rack-map .shelf-devices),
-html[data-theme="mist-sage"] :is(.map-cell, .map-device, .rack-map .map-device, .rack-map .shelf, .rack-map .shelf-devices) {
+html[data-theme='soft-dark']
+  :is(.map-cell, .map-device, .rack-map .map-device, .rack-map .shelf, .rack-map .shelf-devices),
+html[data-theme='mist-sage']
+  :is(.map-cell, .map-device, .rack-map .map-device, .rack-map .shelf, .rack-map .shelf-devices) {
   color: var(--text);
   background: var(--theme-surface-raised);
   border-color: var(--line);
 }
-html[data-theme="soft-dark"] :is(.map-cell.empty, .map-device.empty, .legend.empty),
-html[data-theme="mist-sage"] :is(.map-cell.empty, .map-device.empty, .legend.empty) {
+html[data-theme='soft-dark'] :is(.map-cell.empty, .map-device.empty, .legend.empty),
+html[data-theme='mist-sage'] :is(.map-cell.empty, .map-device.empty, .legend.empty) {
   color: var(--muted);
   background: var(--theme-unknown-bg);
   border-color: var(--theme-unknown-border);
 }
-html[data-theme="soft-dark"] :is(.map-device small, .map-cell small, .rack-map .map-device small),
-html[data-theme="mist-sage"] :is(.map-device small, .map-cell small, .rack-map .map-device small) {
+html[data-theme='soft-dark'] :is(.map-device small, .map-cell small, .rack-map .map-device small),
+html[data-theme='mist-sage'] :is(.map-device small, .map-cell small, .rack-map .map-device small) {
   color: var(--muted);
 }
-html[data-theme="soft-dark"] .fleet-table thead, html[data-theme="soft-dark"] .fleet-table th,
-html[data-theme="mist-sage"] .fleet-table thead, html[data-theme="mist-sage"] .fleet-table th {
+html[data-theme='soft-dark'] .fleet-table thead,
+html[data-theme='soft-dark'] .fleet-table th,
+html[data-theme='mist-sage'] .fleet-table thead,
+html[data-theme='mist-sage'] .fleet-table th {
   color: var(--text);
   background: var(--theme-surface-raised);
   border-color: var(--line);
 }
-html[data-theme="soft-dark"] .fleet-table td, html[data-theme="mist-sage"] .fleet-table td {
+html[data-theme='soft-dark'] .fleet-table td,
+html[data-theme='mist-sage'] .fleet-table td {
   color: var(--text);
   border-color: var(--line);
 }
-html[data-theme="mist-sage"] .fleet-table tbody tr:nth-child(even) { background: #f0f4f2; }
-html[data-theme="soft-dark"] .fleet-table tbody tr:nth-child(even) { background: #343e48; }
-
+html[data-theme='mist-sage'] .fleet-table tbody tr:nth-child(even) {
+  background: #f0f4f2;
+}
+html[data-theme='soft-dark'] .fleet-table tbody tr:nth-child(even) {
+  background: #343e48;
+}
 
 /* Contrast and grouped surfaces: align inventory groups with each selected palette. */
-html[data-theme="mist-sage"] {
+html[data-theme='mist-sage'] {
   --muted: #526267;
 }
-html[data-theme="soft-dark"] {
+html[data-theme='soft-dark'] {
   --muted: #c0c8cd;
 }
-html[data-theme="mist-sage"] :is(.cod-group, .rail-ec, .rail-ec-items, .rail-cod-list, .cod-group-items, .cod-card, .rail-ec summary, .mix-card, .unused-block) {
+html[data-theme='mist-sage']
+  :is(
+    .cod-group,
+    .rail-ec,
+    .rail-ec-items,
+    .rail-cod-list,
+    .cod-group-items,
+    .cod-card,
+    .rail-ec summary,
+    .mix-card,
+    .unused-block
+  ) {
   color: var(--text);
   background: var(--panel2);
   border-color: var(--line);
 }
-html[data-theme="soft-dark"] :is(.cod-group, .rail-ec, .rail-ec-items, .rail-cod-list, .cod-group-items, .cod-card, .rail-ec summary, .mix-card, .unused-block) {
+html[data-theme='soft-dark']
+  :is(
+    .cod-group,
+    .rail-ec,
+    .rail-ec-items,
+    .rail-cod-list,
+    .cod-group-items,
+    .cod-card,
+    .rail-ec summary,
+    .mix-card,
+    .unused-block
+  ) {
   color: var(--text);
   background: var(--panel2);
   border-color: var(--line);
 }
-html[data-theme="mist-sage"] .cod-group-head,
-html[data-theme="mist-sage"] .cod-group-head small,
-html[data-theme="mist-sage"] .cod-group-head>b,
-html[data-theme="mist-sage"] .rail-ec summary,
-html[data-theme="mist-sage"] .rail-ec summary span,
-html[data-theme="mist-sage"] .rail-cod {
+html[data-theme='mist-sage'] .cod-group-head,
+html[data-theme='mist-sage'] .cod-group-head small,
+html[data-theme='mist-sage'] .cod-group-head > b,
+html[data-theme='mist-sage'] .rail-ec summary,
+html[data-theme='mist-sage'] .rail-ec summary span,
+html[data-theme='mist-sage'] .rail-cod {
   color: var(--text);
 }
-html[data-theme="soft-dark"] .cod-group-head,
-html[data-theme="soft-dark"] .cod-group-head small,
-html[data-theme="soft-dark"] .cod-group-head>b,
-html[data-theme="soft-dark"] .rail-ec summary,
-html[data-theme="soft-dark"] .rail-ec summary span,
-html[data-theme="soft-dark"] .rail-cod {
+html[data-theme='soft-dark'] .cod-group-head,
+html[data-theme='soft-dark'] .cod-group-head small,
+html[data-theme='soft-dark'] .cod-group-head > b,
+html[data-theme='soft-dark'] .rail-ec summary,
+html[data-theme='soft-dark'] .rail-ec summary span,
+html[data-theme='soft-dark'] .rail-cod {
   color: var(--text);
 }
-html[data-theme="mist-sage"] .cod-group-head strong,
-html[data-theme="mist-sage"] .rail-ec summary b,
-html[data-theme="soft-dark"] .cod-group-head strong,
-html[data-theme="soft-dark"] .rail-ec summary b {
+html[data-theme='mist-sage'] .cod-group-head strong,
+html[data-theme='mist-sage'] .rail-ec summary b,
+html[data-theme='soft-dark'] .cod-group-head strong,
+html[data-theme='soft-dark'] .rail-ec summary b {
   color: var(--cyan);
 }
-html[data-theme="mist-sage"] .cod-card.selected,
-html[data-theme="soft-dark"] .cod-card.selected {
+html[data-theme='mist-sage'] .cod-card.selected,
+html[data-theme='soft-dark'] .cod-card.selected {
   background: var(--theme-hover);
   border-color: var(--cyan);
 }
-html[data-theme="mist-sage"] .cod-group[open] .cod-group-head,
-html[data-theme="soft-dark"] .cod-group[open] .cod-group-head {
+html[data-theme='mist-sage'] .cod-group[open] .cod-group-head,
+html[data-theme='soft-dark'] .cod-group[open] .cod-group-head {
   border-bottom-color: var(--line);
 }
-html[data-theme="mist-sage"] .rail-ec,
-html[data-theme="soft-dark"] .rail-ec {
+html[data-theme='mist-sage'] .rail-ec,
+html[data-theme='soft-dark'] .rail-ec {
   background: var(--panel2);
 }
-html[data-theme="mist-sage"] .rail-cod:hover,
-html[data-theme="mist-sage"] .rail-cod.selected,
-html[data-theme="soft-dark"] .rail-cod:hover,
-html[data-theme="soft-dark"] .rail-cod.selected {
+html[data-theme='mist-sage'] .rail-cod:hover,
+html[data-theme='mist-sage'] .rail-cod.selected,
+html[data-theme='soft-dark'] .rail-cod:hover,
+html[data-theme='soft-dark'] .rail-cod.selected {
   color: var(--text);
   background: var(--theme-hover);
 }
 
 /* The result map uses .map-device tiles, not the legacy .map-cell class. */
-html[data-theme="soft-dark"] .rack-map.result-map .map-device.healthy {
+html[data-theme='soft-dark'] .rack-map.result-map .map-device.healthy {
   color: #d0e7da;
   background: #3d6556;
   border-color: #6f9c88;
 }
-html[data-theme="mist-sage"] .rack-map.result-map .map-device.healthy {
+html[data-theme='mist-sage'] .rack-map.result-map .map-device.healthy {
   color: #285b43;
   background: #c5e2cf;
   border-color: #83b294;
 }
-html[data-theme="soft-dark"] .rack-map.result-map .map-device.degraded {
+html[data-theme='soft-dark'] .rack-map.result-map .map-device.degraded {
   color: #eee0b9;
   background: #685b3c;
   border-color: #a38b54;
 }
-html[data-theme="mist-sage"] .rack-map.result-map .map-device.degraded {
+html[data-theme='mist-sage'] .rack-map.result-map .map-device.degraded {
   color: #705726;
   background: #f1e5c8;
   border-color: #cfb978;
 }
-html[data-theme="soft-dark"] .rack-map.result-map .map-device.check {
+html[data-theme='soft-dark'] .rack-map.result-map .map-device.check {
   color: #f0c5be;
   background: #684646;
   border-color: #a16c68;
 }
-html[data-theme="mist-sage"] .rack-map.result-map .map-device.check {
+html[data-theme='mist-sage'] .rack-map.result-map .map-device.check {
   color: #80413c;
   background: #f1d5d0;
   border-color: #cd9690;
 }
-html[data-theme="soft-dark"] .rack-map.result-map .map-device.offline {
+html[data-theme='soft-dark'] .rack-map.result-map .map-device.offline {
   color: #d2d6d8;
   background: #4a5056;
   border-color: #777f84;
 }
-html[data-theme="mist-sage"] .rack-map.result-map .map-device.offline {
+html[data-theme='mist-sage'] .rack-map.result-map .map-device.offline {
   color: #60696b;
   background: #e0e5e4;
   border-color: #bfc9c6;
 }
-html[data-theme="soft-dark"] .rack-map.result-map .map-device.unknown,
-html[data-theme="soft-dark"] .rack-map.result-map .map-device.empty {
+html[data-theme='soft-dark'] .rack-map.result-map .map-device.unknown,
+html[data-theme='soft-dark'] .rack-map.result-map .map-device.empty {
   color: #d0d9dc;
   background: #414f59;
   border-color: #657983;
 }
-html[data-theme="mist-sage"] .rack-map.result-map .map-device.unknown,
-html[data-theme="mist-sage"] .rack-map.result-map .map-device.empty {
+html[data-theme='mist-sage'] .rack-map.result-map .map-device.unknown,
+html[data-theme='mist-sage'] .rack-map.result-map .map-device.empty {
   color: #506168;
   background: #e4ecee;
   border-color: #bdcfd3;
 }
-html[data-theme="soft-dark"] .rack-map.result-map .map-device b,
-html[data-theme="soft-dark"] .rack-map.result-map .map-device small,
-html[data-theme="mist-sage"] .rack-map.result-map .map-device b,
-html[data-theme="mist-sage"] .rack-map.result-map .map-device small {
+html[data-theme='soft-dark'] .rack-map.result-map .map-device b,
+html[data-theme='soft-dark'] .rack-map.result-map .map-device small,
+html[data-theme='mist-sage'] .rack-map.result-map .map-device b,
+html[data-theme='mist-sage'] .rack-map.result-map .map-device small {
   color: inherit;
 }
-html[data-theme="mist-sage"] .rack-map.result-map .map-device small,
-html[data-theme="soft-dark"] .rack-map.result-map .map-device small {
-  opacity: .92;
+html[data-theme='mist-sage'] .rack-map.result-map .map-device small,
+html[data-theme='soft-dark'] .rack-map.result-map .map-device small {
+  opacity: 0.92;
 }
 
-
 /* Softer sidebar grouping: keep the hierarchy, remove stacked outer card frames. */
-.rail-cod-list { padding-right: 0; }
+.rail-cod-list {
+  padding-right: 0;
+}
 .rail-ec {
   margin: 3px 0;
   border: 0 !important;
@@ -498,10 +874,16 @@ html[data-theme="soft-dark"] .rack-map.result-map .map-device small {
   border-radius: 5px;
   background: transparent !important;
   color: var(--muted);
-  transition: background .15s ease, border-color .15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
-.rail-ec[open] > summary { border-left-color: var(--cyan); }
-.rail-ec > summary:hover { background: var(--theme-hover, rgba(120,140,150,.08)) !important; }
+.rail-ec[open] > summary {
+  border-left-color: var(--cyan);
+}
+.rail-ec > summary:hover {
+  background: var(--theme-hover, rgba(120, 140, 150, 0.08)) !important;
+}
 .rail-ec-items {
   margin: 2px 0 4px 10px;
   padding: 2px 0 3px 5px;
@@ -514,42 +896,58 @@ html[data-theme="soft-dark"] .rack-map.result-map .map-device small {
   background: transparent;
   color: var(--muted);
 }
-.rail-cod:hover, .rail-cod.selected { background: var(--theme-hover, rgba(120,140,150,.08)); }
-html[data-theme="mist-sage"] .rail-ec > summary { color: #45585d; }
-html[data-theme="soft-dark"] .rail-ec > summary { color: #d0d7da; }
-html[data-theme="original"] .rail-ec > summary { color: #aebdca; }
+.rail-cod:hover,
+.rail-cod.selected {
+  background: var(--theme-hover, rgba(120, 140, 150, 0.08));
+}
+html[data-theme='mist-sage'] .rail-ec > summary {
+  color: #45585d;
+}
+html[data-theme='soft-dark'] .rail-ec > summary {
+  color: #d0d7da;
+}
+html[data-theme='original'] .rail-ec > summary {
+  color: #aebdca;
+}
 
 /* NoPIC is a state badge: enabled is calm green, disabled is neutral, unknown stays muted. */
 .map-nopic {
   --nopic-accent: #93a0aa;
-  --nopic-bg: rgba(148,163,184,.10);
-  --nopic-border: rgba(148,163,184,.35);
+  --nopic-bg: rgba(148, 163, 184, 0.1);
+  --nopic-border: rgba(148, 163, 184, 0.35);
   display: grid;
-  grid-template-columns: minmax(0,1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px 12px;
   padding: 10px 11px;
   border-radius: 9px;
   background: var(--nopic-bg);
   border: 1px solid var(--nopic-border);
-  transition: background .16s ease, border-color .16s ease, color .16s ease;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
 }
 .map-nopic.nopic-enabled {
   --nopic-accent: #4b9a70;
-  --nopic-bg: rgba(76,175,118,.10);
-  --nopic-border: rgba(76,175,118,.42);
+  --nopic-bg: rgba(76, 175, 118, 0.1);
+  --nopic-border: rgba(76, 175, 118, 0.42);
 }
 .map-nopic.nopic-disabled {
   --nopic-accent: #8d9aa2;
-  --nopic-bg: rgba(139,151,160,.09);
-  --nopic-border: rgba(139,151,160,.34);
+  --nopic-bg: rgba(139, 151, 160, 0.09);
+  --nopic-border: rgba(139, 151, 160, 0.34);
 }
 .map-nopic.nopic-unknown {
   --nopic-accent: #84949c;
-  --nopic-bg: rgba(132,148,156,.07);
-  --nopic-border: rgba(132,148,156,.25);
+  --nopic-bg: rgba(132, 148, 156, 0.07);
+  --nopic-border: rgba(132, 148, 156, 0.25);
 }
-.map-nopic>b { color: var(--text); font-size: 11px; line-height: 1.35; }
+.map-nopic > b {
+  color: var(--text);
+  font-size: 11px;
+  line-height: 1.35;
+}
 .map-nopic-current {
   grid-column: 1;
   display: inline-flex;
@@ -565,7 +963,10 @@ html[data-theme="original"] .rail-ec > summary { color: #aebdca; }
   font-size: 10px !important;
   line-height: 1.4;
 }
-.map-nopic-current strong { color: var(--nopic-accent); font-weight: 750; }
+.map-nopic-current strong {
+  color: var(--nopic-accent);
+  font-weight: 750;
+}
 .map-nopic-mode {
   grid-column: 2;
   grid-row: 1 / span 2;
@@ -578,88 +979,128 @@ html[data-theme="original"] .rail-ec > summary { color: #aebdca; }
   background: var(--panel);
   font-size: 11px;
 }
-html[data-theme="soft-dark"] .map-nopic.nopic-enabled {
+html[data-theme='soft-dark'] .map-nopic.nopic-enabled {
   --nopic-accent: #a7d8bc;
-  --nopic-bg: rgba(90,160,120,.15);
-  --nopic-border: rgba(126,194,154,.43);
+  --nopic-bg: rgba(90, 160, 120, 0.15);
+  --nopic-border: rgba(126, 194, 154, 0.43);
 }
-html[data-theme="soft-dark"] .map-nopic.nopic-disabled {
+html[data-theme='soft-dark'] .map-nopic.nopic-disabled {
   --nopic-accent: #c0c9cd;
-  --nopic-bg: rgba(165,176,181,.09);
-  --nopic-border: rgba(165,176,181,.28);
+  --nopic-bg: rgba(165, 176, 181, 0.09);
+  --nopic-border: rgba(165, 176, 181, 0.28);
 }
-html[data-theme="soft-dark"] .map-nopic.nopic-unknown {
+html[data-theme='soft-dark'] .map-nopic.nopic-unknown {
   --nopic-accent: #b0bec4;
-  --nopic-bg: rgba(145,164,174,.08);
-  --nopic-border: rgba(145,164,174,.25);
+  --nopic-bg: rgba(145, 164, 174, 0.08);
+  --nopic-border: rgba(145, 164, 174, 0.25);
 }
-html[data-theme="mist-sage"] .map-nopic.nopic-enabled {
+html[data-theme='mist-sage'] .map-nopic.nopic-enabled {
   --nopic-accent: #34734f;
   --nopic-bg: #e6f2e9;
   --nopic-border: #add0b8;
 }
-html[data-theme="mist-sage"] .map-nopic.nopic-disabled {
+html[data-theme='mist-sage'] .map-nopic.nopic-disabled {
   --nopic-accent: #5e6c71;
   --nopic-bg: #edf0ef;
   --nopic-border: #cbd4d1;
 }
-html[data-theme="mist-sage"] .map-nopic.nopic-unknown {
+html[data-theme='mist-sage'] .map-nopic.nopic-unknown {
   --nopic-accent: #65777d;
   --nopic-bg: #eff3f2;
   --nopic-border: #d3dcd9;
 }
-html[data-theme="mist-sage"] .map-nopic-mode { background: #fff; }
-html[data-theme="soft-dark"] .map-nopic-mode { background: #252d36; }
+html[data-theme='mist-sage'] .map-nopic-mode {
+  background: #fff;
+}
+html[data-theme='soft-dark'] .map-nopic-mode {
+  background: #252d36;
+}
 
 /* Keep live telemetry compact but visually grouped with its status card. */
-.sensor-chip, .fan-chip {
+.sensor-chip,
+.fan-chip {
   min-height: 28px;
   padding: 4px 8px;
   border-radius: 7px;
 }
-.sensor-chip small, .fan-chip small { opacity: .82; letter-spacing: .04em; }
-.sensor-chip b, .fan-chip b { font-variant-numeric: tabular-nums; }
-html[data-theme="mist-sage"] .sensor-chip { color: #3b6258; background: #e9f2ee; border-color: #cfdfd8; }
-html[data-theme="mist-sage"] .sensor-chip b { color: #315d50; }
-html[data-theme="mist-sage"] .fan-chip { color: #4a5f79; background: #edf1f7; border-color: #d7dfeb; }
-html[data-theme="mist-sage"] .fan-chip b { color: #3e5877; }
-html[data-theme="soft-dark"] .sensor-chip { color: #c5ddd5; background: #354943; border-color: #526f65; }
-html[data-theme="soft-dark"] .sensor-chip b { color: #d2e8df; }
-html[data-theme="soft-dark"] .fan-chip { color: #cad6e9; background: #394553; border-color: #56677b; }
-html[data-theme="soft-dark"] .fan-chip b { color: #dbe4f2; }
+.sensor-chip small,
+.fan-chip small {
+  opacity: 0.82;
+  letter-spacing: 0.04em;
+}
+.sensor-chip b,
+.fan-chip b {
+  font-variant-numeric: tabular-nums;
+}
+html[data-theme='mist-sage'] .sensor-chip {
+  color: #3b6258;
+  background: #e9f2ee;
+  border-color: #cfdfd8;
+}
+html[data-theme='mist-sage'] .sensor-chip b {
+  color: #315d50;
+}
+html[data-theme='mist-sage'] .fan-chip {
+  color: #4a5f79;
+  background: #edf1f7;
+  border-color: #d7dfeb;
+}
+html[data-theme='mist-sage'] .fan-chip b {
+  color: #3e5877;
+}
+html[data-theme='soft-dark'] .sensor-chip {
+  color: #c5ddd5;
+  background: #354943;
+  border-color: #526f65;
+}
+html[data-theme='soft-dark'] .sensor-chip b {
+  color: #d2e8df;
+}
+html[data-theme='soft-dark'] .fan-chip {
+  color: #cad6e9;
+  background: #394553;
+  border-color: #56677b;
+}
+html[data-theme='soft-dark'] .fan-chip b {
+  color: #dbe4f2;
+}
 
 @media (max-width: 620px) {
-  .map-nopic { gap: 7px; padding: 9px; }
-  .map-nopic-mode { min-width: 92px; }
+  .map-nopic {
+    gap: 7px;
+    padding: 9px;
+  }
+  .map-nopic-mode {
+    min-width: 92px;
+  }
 }
 
 /* Ensure board sensor labels and measured values stay readable in the light theme. */
-html[data-theme="mist-sage"] .map-board-row .map-board-temperature {
+html[data-theme='mist-sage'] .map-board-row .map-board-temperature {
   color: #526367 !important;
   opacity: 1 !important;
 }
-html[data-theme="mist-sage"] .map-board-row .map-board-temperature span {
+html[data-theme='mist-sage'] .map-board-row .map-board-temperature span {
   color: #526367 !important;
 }
-html[data-theme="mist-sage"] .map-board-row .map-board-temperature b {
+html[data-theme='mist-sage'] .map-board-row .map-board-temperature b {
   color: #315b4e !important;
   opacity: 1 !important;
 }
-html[data-theme="mist-sage"] .sensor-chip small,
-html[data-theme="mist-sage"] .fan-chip small {
+html[data-theme='mist-sage'] .sensor-chip small,
+html[data-theme='mist-sage'] .fan-chip small {
   color: #52646a !important;
   opacity: 1 !important;
 }
-
 
 /* Board and telemetry grouping: one visual language across the three palettes. */
 :root {
   --board-group-bg: #111a22;
   --board-row-bg: #141e27;
   --board-row-border: #2b3b46;
-  --board-ok-bg: rgba(52,122,91,.12);
+  --board-ok-bg: rgba(52, 122, 91, 0.12);
   --board-ok-border: #34735b;
-  --board-fault-bg: rgba(152,67,74,.12);
+  --board-fault-bg: rgba(152, 67, 74, 0.12);
   --board-fault-border: #87515a;
   --board-chip-bg: #19262e;
   --board-chip-border: #33434c;
@@ -670,7 +1111,7 @@ html[data-theme="mist-sage"] .fan-chip small {
   --fan-label: #aebdd0;
   --fan-value: #d7e3f3;
 }
-html[data-theme="soft-dark"] {
+html[data-theme='soft-dark'] {
   --board-group-bg: #2c353f;
   --board-row-bg: #343e48;
   --board-row-border: #4d5b66;
@@ -687,7 +1128,7 @@ html[data-theme="soft-dark"] {
   --fan-label: #c4cedd;
   --fan-value: #e1e8f2;
 }
-html[data-theme="mist-sage"] {
+html[data-theme='mist-sage'] {
   --board-group-bg: #f0f5f2;
   --board-row-bg: #f9fbfa;
   --board-row-border: #d5e0da;
@@ -716,13 +1157,17 @@ html[data-theme="mist-sage"] {
   border-bottom: 1px solid var(--line);
   color: var(--text);
 }
-.map-board-stack { gap: 6px; }
+.map-board-stack {
+  gap: 6px;
+}
 .map-board-row {
   background: var(--board-row-bg) !important;
   border-color: var(--board-row-border) !important;
   border-radius: 8px;
   color: var(--text);
-  transition: background .15s ease, border-color .15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
 .map-board-row.working {
   background: var(--board-ok-bg) !important;
@@ -732,8 +1177,13 @@ html[data-theme="mist-sage"] {
   background: var(--board-fault-bg) !important;
   border-color: var(--board-fault-border) !important;
 }
-.map-board-row > span > b, .map-board-row > strong { color: var(--text); }
-.map-board-row > span > small:not(.map-board-temperature) { color: var(--muted); }
+.map-board-row > span > b,
+.map-board-row > strong {
+  color: var(--text);
+}
+.map-board-row > span > small:not(.map-board-temperature) {
+  color: var(--muted);
+}
 .map-board-temperature {
   display: flex !important;
   flex-wrap: wrap;
@@ -781,13 +1231,20 @@ html[data-theme="mist-sage"] {
   color: var(--fan-label) !important;
   opacity: 1 !important;
 }
-.map-fan-chips .fan-chip b { color: var(--fan-value) !important; }
-@media (max-width: 480px) {
-  .map-board-controls { padding: 8px; }
-  .map-board-temperature { gap: 4px !important; }
-  .map-board-temperature > span { padding: 3px 6px; }
+.map-fan-chips .fan-chip b {
+  color: var(--fan-value) !important;
 }
-
+@media (max-width: 480px) {
+  .map-board-controls {
+    padding: 8px;
+  }
+  .map-board-temperature {
+    gap: 4px !important;
+  }
+  .map-board-temperature > span {
+    padding: 3px 6px;
+  }
+}
 
 /* Readability and clear status accents on top of the user's supplied CSS base. */
 :root {
@@ -799,7 +1256,7 @@ html[data-theme="mist-sage"] {
   --status-red-bg: #4a3838;
   --status-red-border: #805752;
 }
-html[data-theme="soft-dark"] {
+html[data-theme='soft-dark'] {
   --readable-muted: #c3ccd1;
   --status-green-text: #b9e0c8;
   --status-green-bg: #31483e;
@@ -808,7 +1265,7 @@ html[data-theme="soft-dark"] {
   --status-red-bg: #4b3739;
   --status-red-border: #966269;
 }
-html[data-theme="mist-sage"] {
+html[data-theme='mist-sage'] {
   --readable-muted: #53666b;
   --status-green-text: #356b4f;
   --status-green-bg: #e5f1e9;
@@ -819,16 +1276,56 @@ html[data-theme="mist-sage"] {
 }
 
 /* Secondary copy, form states and metadata should not inherit low-contrast browser defaults. */
-html[data-theme="soft-dark"] :is(.map-device-meta, .red-device-meta, .red-summary-hint, .section-description, .top-meta, .form-help, .scan-caption, .section-head small, .map-subhead small, .manual-defect-row span, .empty, .empty small) {
+html[data-theme='soft-dark']
+  :is(
+    .map-device-meta,
+    .red-device-meta,
+    .red-summary-hint,
+    .section-description,
+    .top-meta,
+    .form-help,
+    .scan-caption,
+    .section-head small,
+    .map-subhead small,
+    .manual-defect-row span,
+    .empty,
+    .empty small
+  ) {
   color: var(--readable-muted);
 }
-html[data-theme="mist-sage"] :is(.map-device-meta, .red-device-meta, .red-summary-hint, .section-description, .top-meta, .form-help, .scan-caption, .section-head small, .map-subhead small, .manual-defect-row span, .empty, .empty small) {
+html[data-theme='mist-sage']
+  :is(
+    .map-device-meta,
+    .red-device-meta,
+    .red-summary-hint,
+    .section-description,
+    .top-meta,
+    .form-help,
+    .scan-caption,
+    .section-head small,
+    .map-subhead small,
+    .manual-defect-row span,
+    .empty,
+    .empty small
+  ) {
   color: #53666b;
 }
-html[data-theme="soft-dark"] :is(input::placeholder, textarea::placeholder) { color: #b6c2c8; opacity: 1; }
-html[data-theme="mist-sage"] :is(input::placeholder, textarea::placeholder) { color: #63757a; opacity: 1; }
-html[data-theme="soft-dark"] :is(button:disabled, input:disabled, select:disabled) { color: #bac4c9; opacity: .82; }
-html[data-theme="mist-sage"] :is(button:disabled, input:disabled, select:disabled) { color: #596a6f; opacity: .88; }
+html[data-theme='soft-dark'] :is(input::placeholder, textarea::placeholder) {
+  color: #b6c2c8;
+  opacity: 1;
+}
+html[data-theme='mist-sage'] :is(input::placeholder, textarea::placeholder) {
+  color: #63757a;
+  opacity: 1;
+}
+html[data-theme='soft-dark'] :is(button:disabled, input:disabled, select:disabled) {
+  color: #bac4c9;
+  opacity: 0.82;
+}
+html[data-theme='mist-sage'] :is(button:disabled, input:disabled, select:disabled) {
+  color: #596a6f;
+  opacity: 0.88;
+}
 
 /* The recovered and faulty states retain a visible left rail after theme surfaces override borders. */
 .recovered-green-chip {
@@ -840,8 +1337,12 @@ html[data-theme="mist-sage"] :is(button:disabled, input:disabled, select:disable
   border-right-color: var(--status-green-border) !important;
   border-bottom-color: var(--status-green-border) !important;
 }
-.recovered-green-chip b { color: var(--status-green-text) !important; }
-.recovered-green-chip small { color: var(--readable-muted) !important; }
+.recovered-green-chip b {
+  color: var(--status-green-text) !important;
+}
+.recovered-green-chip small {
+  color: var(--readable-muted) !important;
+}
 .red-device-card:not(.recovered) {
   border-left: 4px solid var(--status-red-border) !important;
   padding-left: 9px;
@@ -862,106 +1363,174 @@ html[data-theme="mist-sage"] :is(button:disabled, input:disabled, select:disable
   background: var(--status-green-bg) !important;
   border-color: var(--status-green-border) !important;
 }
-html[data-theme="soft-dark"] :is(.map-cell.check, .map-device.check, .fleet-chip.check, .legend.check, .board-line.bad, .status-chip.bad) {
+html[data-theme='soft-dark']
+  :is(
+    .map-cell.check,
+    .map-device.check,
+    .fleet-chip.check,
+    .legend.check,
+    .board-line.bad,
+    .status-chip.bad
+  ) {
   color: var(--status-red-text) !important;
   background: var(--status-red-bg) !important;
   border-left: 4px solid var(--status-red-border) !important;
 }
-html[data-theme="mist-sage"] :is(.map-cell.check, .map-device.check, .fleet-chip.check, .legend.check, .board-line.bad, .status-chip.bad) {
+html[data-theme='mist-sage']
+  :is(
+    .map-cell.check,
+    .map-device.check,
+    .fleet-chip.check,
+    .legend.check,
+    .board-line.bad,
+    .status-chip.bad
+  ) {
   color: var(--status-red-text) !important;
   background: var(--status-red-bg) !important;
   border-left: 4px solid var(--status-red-border) !important;
 }
-html[data-theme="soft-dark"] :is(.recovered-green-list, .recovered-green-chip, .recovered-global-list) {
+html[data-theme='soft-dark']
+  :is(.recovered-green-list, .recovered-green-chip, .recovered-global-list) {
   color: var(--status-green-text);
 }
-html[data-theme="mist-sage"] :is(.recovered-green-list, .recovered-green-chip, .recovered-global-list) {
+html[data-theme='mist-sage']
+  :is(.recovered-green-list, .recovered-green-chip, .recovered-global-list) {
   color: var(--status-green-text);
 }
-
 
 /* Explicit edge rails on fleet/map statuses; later status surfaces must not erase these accents. */
-html[data-theme="soft-dark"] :is(.map-device.healthy, .map-cell.healthy, .fleet-chip.healthy, .recovered-green-chip, .red-device-card.recovered) {
+html[data-theme='soft-dark']
+  :is(
+    .map-device.healthy,
+    .map-cell.healthy,
+    .fleet-chip.healthy,
+    .recovered-green-chip,
+    .red-device-card.recovered
+  ) {
   color: #b9e0c8 !important;
   background-color: #31483e !important;
   border-left: 4px solid #79a88d !important;
 }
-html[data-theme="mist-sage"] :is(.map-device.healthy, .map-cell.healthy, .fleet-chip.healthy, .recovered-green-chip, .red-device-card.recovered) {
+html[data-theme='mist-sage']
+  :is(
+    .map-device.healthy,
+    .map-cell.healthy,
+    .fleet-chip.healthy,
+    .recovered-green-chip,
+    .red-device-card.recovered
+  ) {
   color: #356b4f !important;
   background-color: #e5f1e9 !important;
   border-left: 4px solid #78a889 !important;
 }
-html[data-theme="soft-dark"] :is(.map-device.check, .map-cell.check, .fleet-chip.check, .red-device-card:not(.recovered)) {
+html[data-theme='soft-dark']
+  :is(.map-device.check, .map-cell.check, .fleet-chip.check, .red-device-card:not(.recovered)) {
   color: #efb7b0 !important;
   background-color: #4b3739 !important;
   border-left: 4px solid #c0787c !important;
 }
-html[data-theme="mist-sage"] :is(.map-device.check, .map-cell.check, .fleet-chip.check, .red-device-card:not(.recovered)) {
+html[data-theme='mist-sage']
+  :is(.map-device.check, .map-cell.check, .fleet-chip.check, .red-device-card:not(.recovered)) {
   color: #874641 !important;
   background-color: #f7e9e6 !important;
   border-left: 4px solid #c77970 !important;
 }
-html[data-theme="soft-dark"] :is(.map-device.healthy, .map-device.check, .map-cell.healthy, .map-cell.check, .fleet-chip.healthy, .fleet-chip.check) {
+html[data-theme='soft-dark']
+  :is(
+    .map-device.healthy,
+    .map-device.check,
+    .map-cell.healthy,
+    .map-cell.check,
+    .fleet-chip.healthy,
+    .fleet-chip.check
+  ) {
   border-top-color: #53635e !important;
   border-right-color: #53635e !important;
   border-bottom-color: #53635e !important;
 }
-html[data-theme="mist-sage"] :is(.map-device.healthy, .map-device.check, .map-cell.healthy, .map-cell.check, .fleet-chip.healthy, .fleet-chip.check) {
+html[data-theme='mist-sage']
+  :is(
+    .map-device.healthy,
+    .map-device.check,
+    .map-cell.healthy,
+    .map-cell.check,
+    .fleet-chip.healthy,
+    .fleet-chip.check
+  ) {
   border-top-color: #cbd8d1 !important;
   border-right-color: #cbd8d1 !important;
   border-bottom-color: #cbd8d1 !important;
 }
-html[data-theme="soft-dark"] .recovered-green-chip small { color: #c1d3c8 !important; }
-html[data-theme="mist-sage"] .recovered-green-chip small { color: #53666b !important; }
-html[data-theme="soft-dark"] .red-device-card:not(.recovered) .red-device-meta,
-html[data-theme="soft-dark"] .red-device-card:not(.recovered) .red-device-meta b { color: #c3ccd1 !important; }
-html[data-theme="mist-sage"] .red-device-card:not(.recovered) .red-device-meta,
-html[data-theme="mist-sage"] .red-device-card:not(.recovered) .red-device-meta b { color: #53666b !important; }
-
+html[data-theme='soft-dark'] .recovered-green-chip small {
+  color: #c1d3c8 !important;
+}
+html[data-theme='mist-sage'] .recovered-green-chip small {
+  color: #53666b !important;
+}
+html[data-theme='soft-dark'] .red-device-card:not(.recovered) .red-device-meta,
+html[data-theme='soft-dark'] .red-device-card:not(.recovered) .red-device-meta b {
+  color: #c3ccd1 !important;
+}
+html[data-theme='mist-sage'] .red-device-card:not(.recovered) .red-device-meta,
+html[data-theme='mist-sage'] .red-device-card:not(.recovered) .red-device-meta b {
+  color: #53666b !important;
+}
 
 /* Firmware identity and Braiins sleep state: visibly separate from fault/offline colors. */
-.map-device.sleep, .legend.sleep {
+.map-device.sleep,
+.legend.sleep {
   color: #d2e9ff !important;
   background: #1e4266 !important;
   border-color: #5b8db8 !important;
 }
-.map-device.other-firmware, .legend.other-firmware {
+.map-device.other-firmware,
+.legend.other-firmware {
   color: #e4ddff !important;
   background: #393555 !important;
   border-color: #8179ad !important;
 }
-html[data-theme="soft-dark"] .rack-map.result-map .map-device.sleep,
-html[data-theme="soft-dark"] .map-legend .legend.sleep {
+html[data-theme='soft-dark'] .rack-map.result-map .map-device.sleep,
+html[data-theme='soft-dark'] .map-legend .legend.sleep {
   color: #d1e8ff !important;
   background: #2c4867 !important;
   border-color: #6c92ba !important;
 }
-html[data-theme="mist-sage"] .rack-map.result-map .map-device.sleep,
-html[data-theme="mist-sage"] .map-legend .legend.sleep {
+html[data-theme='mist-sage'] .rack-map.result-map .map-device.sleep,
+html[data-theme='mist-sage'] .map-legend .legend.sleep {
   color: #234f77 !important;
   background: #dcecf7 !important;
   border-color: #83adc9 !important;
 }
-html[data-theme="soft-dark"] .rack-map.result-map .map-device.other-firmware,
-html[data-theme="soft-dark"] .map-legend .legend.other-firmware {
+html[data-theme='soft-dark'] .rack-map.result-map .map-device.other-firmware,
+html[data-theme='soft-dark'] .map-legend .legend.other-firmware {
   color: #e2dbf8 !important;
   background: #463f61 !important;
   border-color: #9183b6 !important;
 }
-html[data-theme="mist-sage"] .rack-map.result-map .map-device.other-firmware,
-html[data-theme="mist-sage"] .map-legend .legend.other-firmware {
+html[data-theme='mist-sage'] .rack-map.result-map .map-device.other-firmware,
+html[data-theme='mist-sage'] .map-legend .legend.other-firmware {
   color: #554779 !important;
   background: #ebe8f8 !important;
   border-color: #b2a6d2 !important;
 }
-.map-device.sleep, .map-device.other-firmware,
-html[data-theme="soft-dark"] .map-device.sleep, html[data-theme="soft-dark"] .map-device.other-firmware,
-html[data-theme="mist-sage"] .map-device.sleep, html[data-theme="mist-sage"] .map-device.other-firmware {
+.map-device.sleep,
+.map-device.other-firmware,
+html[data-theme='soft-dark'] .map-device.sleep,
+html[data-theme='soft-dark'] .map-device.other-firmware,
+html[data-theme='mist-sage'] .map-device.sleep,
+html[data-theme='mist-sage'] .map-device.other-firmware {
   border-left: 4px solid currentColor !important;
 }
-.t-sleep { color: #83bce8 !important; font-weight: 700; }
-html[data-theme="soft-dark"] .t-sleep { color: #a9d0f2 !important; }
-html[data-theme="mist-sage"] .t-sleep { color: #35688e !important; }
+.t-sleep {
+  color: #83bce8 !important;
+  font-weight: 700;
+}
+html[data-theme='soft-dark'] .t-sleep {
+  color: #a9d0f2 !important;
+}
+html[data-theme='mist-sage'] .t-sleep {
+  color: #35688e !important;
+}
 
 /* Keep map cells square while allowing them to shrink with the rack, as in v1.3.9. */
 .rack-map.result-map .map-device,
@@ -1002,7 +1571,6 @@ html[data-theme="mist-sage"] .t-sleep { color: #35688e !important; }
   display: none;
 }
 
-
 /* Keep non-Braiins firmware purple across every selectable theme. */
 html[data-theme] .board-line.other-firmware,
 html[data-theme] .map-cell.other-firmware,
@@ -1015,8 +1583,12 @@ html[data-theme] .failed.other-firmware {
   background: #393555 !important;
   border-color: #8179ad !important;
 }
-html[data-theme] .board-line.other-firmware { border-left: 3px solid #8179ad !important; }
-html[data-theme] .board-line.other-firmware .board-hash { color: #d8ccff !important; }
+html[data-theme] .board-line.other-firmware {
+  border-left: 3px solid #8179ad !important;
+}
+html[data-theme] .board-line.other-firmware .board-hash {
+  color: #d8ccff !important;
+}
 html[data-theme] .status-chip.sleep,
 html[data-theme] .fleet-chip.sleep,
 html[data-theme] .monitor-ratio.sleep,

@@ -1,1 +1,89 @@
-<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Настройка карт — ASIC ToolBox</title><link rel="icon" href="/app-icon.ico" type="image/x-icon"><link rel="stylesheet" href="styles.css?v=1.4.5"><link rel="stylesheet" href="/themes.css?v=1.4.5"><script>(function(){try{var t=localStorage.getItem('asic-toolbox-theme');if(['original','soft-dark','mist-sage'].indexOf(t)!==-1)document.documentElement.dataset.theme=t;}catch(e){}})();</script></head><body><div class="app-shell"><aside class="rail"><div class="brand"><a href="/" aria-label="ASIC ToolBox — главная"><strong>ASIC</strong><span>TOOLBOX</span></a></div><div class="rail-label">РАБОЧЕЕ МЕСТО</div><a class="rail-link" href="/#overview"><span>⌂</span> Обзор</a><a class="rail-link" href="/#cods"><span>▦</span> ЦОДы</a><div id="railCods" class="rail-cod-list"><div class="rail-empty">Загрузка ЦОДов…</div></div><a class="rail-link scan-anchor" href="/#scan"><span>◉</span> Сканирование</a><a class="rail-link" href="/maps.html"><span>▦</span> Карты и результат</a><a class="rail-link active" href="/map-builder.html"><span>⚙</span> Настройка карт</a><a class="rail-link" href="/#mixes"><span>◌</span> Миксы</a><a class="rail-link" href="/#board-control"><span>⚙</span> Управление платами</a><div class="rail-spacer"></div><a class="rail-link guide-link" href="/guide.html"><span>?</span> Руководство</a><div class="theme-picker"><label for="theme-switch">ТЕМА ОФОРМЛЕНИЯ</label><select id="theme-switch" data-theme-switch aria-label="Выбрать тему оформления"><option value="original">Оригинальная</option><option value="soft-dark">Тёмная</option><option value="mist-sage">Светлая</option></select></div><div class="rail-footer"><span class="dot live"></span><span>Локальный режим</span></div></aside><main><header class="topbar"><div><div class="eyebrow">ASIC TOOLBOX / MAP BUILDER</div><h1>Настройка карт ЦОДов</h1><p class="section-description">Здесь задаётся физическая расстановка и IP каждой позиции. Результаты скана находятся на отдельной странице.</p></div></header><section class="panel"><div class="map-toolbar"><label>ЦОД<select id="mapCodSelect"><option value="">Выберите ЦОД</option></select></label><label>Стеллажей<input id="mapRacks" type="number" min="1" value="11"></label><label>Полок<input id="mapShelves" type="number" min="1" value="6"></label><label>ASIC на полке<input id="mapDevicesPerShelf" type="number" min="1" value="4"></label><button id="mapGenerateBtn" class="button secondary small-button">Сформировать</button><button id="mapSaveBtn" class="button primary small-button">Сохранить карту</button></div><div id="mapCodMeta" class="map-cod-meta">Выберите ЦОД</div><div class="builder-note">IP заполняются автоматически из диапазона ЦОДа. Нажмите на квадрат, чтобы заменить IP вручную.</div><div id="rackMap" class="rack-map builder-map empty"><div class="empty-icon">▦</div><h3>Карта не выбрана</h3></div></section></main></div><div id="toast" class="toast"></div><script src="/map-builder.js?v=20261026-3"></script><script src="/theme.js?v=1.4.5"></script></body></html>
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Настройка карт — ASIC ToolBox</title>
+    <link rel="icon" href="/app-icon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="styles.css?v=1.4.5" />
+    <link rel="stylesheet" href="/themes.css?v=1.4.5" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('asic-toolbox-theme');
+          if (['original', 'soft-dark', 'mist-sage'].indexOf(t) !== -1)
+            document.documentElement.dataset.theme = t;
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="rail">
+        <div class="brand">
+          <a href="/" aria-label="ASIC ToolBox — главная"
+            ><strong>ASIC</strong><span>TOOLBOX</span></a
+          >
+        </div>
+        <div class="rail-label">РАБОЧЕЕ МЕСТО</div>
+        <a class="rail-link" href="/#overview"><span>⌂</span> Обзор</a
+        ><a class="rail-link" href="/#cods"><span>▦</span> ЦОДы</a>
+        <div id="railCods" class="rail-cod-list"><div class="rail-empty">Загрузка ЦОДов…</div></div>
+        <a class="rail-link scan-anchor" href="/#scan"><span>◉</span> Сканирование</a
+        ><a class="rail-link" href="/maps.html"><span>▦</span> Карты и результат</a
+        ><a class="rail-link active" href="/map-builder.html"><span>⚙</span> Настройка карт</a
+        ><a class="rail-link" href="/#mixes"><span>◌</span> Миксы</a
+        ><a class="rail-link" href="/#board-control"><span>⚙</span> Управление платами</a>
+        <div class="rail-spacer"></div>
+        <a class="rail-link guide-link" href="/guide.html"><span>?</span> Руководство</a>
+        <div class="theme-picker">
+          <label for="theme-switch">ТЕМА ОФОРМЛЕНИЯ</label
+          ><select id="theme-switch" data-theme-switch aria-label="Выбрать тему оформления">
+            <option value="original">Оригинальная</option>
+            <option value="soft-dark">Тёмная</option>
+            <option value="mist-sage">Светлая</option>
+          </select>
+        </div>
+        <div class="rail-footer"><span class="dot live"></span><span>Локальный режим</span></div>
+      </aside>
+      <main>
+        <header class="topbar">
+          <div>
+            <div class="eyebrow">ASIC TOOLBOX / MAP BUILDER</div>
+            <h1>Настройка карт ЦОДов</h1>
+            <p class="section-description">
+              Здесь задаётся физическая расстановка и IP каждой позиции. Результаты скана находятся
+              на отдельной странице.
+            </p>
+          </div>
+        </header>
+        <section class="panel">
+          <div class="map-toolbar">
+            <label
+              >ЦОД<select id="mapCodSelect">
+                <option value="">Выберите ЦОД</option>
+              </select></label
+            ><label>Стеллажей<input id="mapRacks" type="number" min="1" value="11" /></label
+            ><label>Полок<input id="mapShelves" type="number" min="1" value="6" /></label
+            ><label
+              >ASIC на полке<input id="mapDevicesPerShelf" type="number" min="1" value="4" /></label
+            ><button id="mapGenerateBtn" class="button secondary small-button">Сформировать</button
+            ><button id="mapSaveBtn" class="button primary small-button">Сохранить карту</button>
+          </div>
+          <div id="mapCodMeta" class="map-cod-meta">Выберите ЦОД</div>
+          <div class="builder-note">
+            IP заполняются автоматически из диапазона ЦОДа. Нажмите на квадрат, чтобы заменить IP
+            вручную.
+          </div>
+          <div id="rackMap" class="rack-map builder-map empty">
+            <div class="empty-icon">▦</div>
+            <h3>Карта не выбрана</h3>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div id="toast" class="toast"></div>
+    <script src="/map-builder.js?v=20261026-3"></script>
+    <script src="/theme.js?v=1.4.5"></script>
+  </body>
+</html>

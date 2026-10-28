@@ -9,7 +9,7 @@ set "ASIC_PASSWORD=root"
 
 echo.
 echo ASIC ToolBox
- echo Local-only mode: http://127.0.0.1:%PORT%
+echo Local-only mode: http://127.0.0.1:%PORT%
 echo Close this window to stop the server.
 echo.
 

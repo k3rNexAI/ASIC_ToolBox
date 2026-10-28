@@ -58,37 +58,73 @@
       </form>
     </details>`;
 
-  const setValue = (id, value) => { const el = $(`#${id}`); if (el) el.value = value; };
+  const setValue = (id, value) => {
+    const el = $(`#${id}`);
+    if (el) el.value = value;
+  };
   const syncProtocolControls = (settings) => {
     const selected = settings.protocol;
-    const checked = selected === 'auto' ? { useRest: true, useGrpc: true, useLegacy: true } : { useRest: selected === 'rest', useGrpc: selected === 'grpc', useLegacy: selected === 'legacy' || selected === 'hybrid' };
-    for (const [id, value] of Object.entries(checked)) { const input = $(`#${id}`); if (input) input.checked = value; }
-    const portLabels = [['useRest', `REST API ${settings.restPort}`], ['useGrpc', `gRPC ${settings.grpcPort}`], ['useLegacy', `TCP ${settings.legacyPort}`]];
-    for (const [id, text] of portLabels) { const strong = $(`#${id}`)?.parentElement?.querySelector('strong'); if (strong) strong.textContent = text; }
+    const checked =
+      selected === 'auto'
+        ? { useRest: true, useGrpc: true, useLegacy: true }
+        : {
+            useRest: selected === 'rest',
+            useGrpc: selected === 'grpc',
+            useLegacy: selected === 'legacy' || selected === 'hybrid',
+          };
+    for (const [id, value] of Object.entries(checked)) {
+      const input = $(`#${id}`);
+      if (input) input.checked = value;
+    }
+    const portLabels = [
+      ['useRest', `REST API ${settings.restPort}`],
+      ['useGrpc', `gRPC ${settings.grpcPort}`],
+      ['useLegacy', `TCP ${settings.legacyPort}`],
+    ];
+    for (const [id, text] of portLabels) {
+      const strong = $(`#${id}`)?.parentElement?.querySelector('strong');
+      if (strong) strong.textContent = text;
+    }
     window.dispatchEvent(new CustomEvent('scanner-settings-applied', { detail: settings }));
   };
   const fill = (settings) => {
     window.appliedScanSettings = settings;
-    setValue('mapProtocol', settings.protocol); setValue('scanBatchSize', settings.batchSize); setValue('scanMaxIps', settings.maxScanIps);
-    setValue('scanRestTimeout', settings.restTimeoutMs); setValue('scanGrpcTimeout', settings.grpcTimeoutMs);
-    setValue('scanLegacyTimeout', settings.legacyTimeoutMs); setValue('scanRestPort', settings.restPort);
-    setValue('scanGrpcPort', settings.grpcPort); setValue('scanLegacyPort', settings.legacyPort);
+    setValue('mapProtocol', settings.protocol);
+    setValue('scanBatchSize', settings.batchSize);
+    setValue('scanMaxIps', settings.maxScanIps);
+    setValue('scanRestTimeout', settings.restTimeoutMs);
+    setValue('scanGrpcTimeout', settings.grpcTimeoutMs);
+    setValue('scanLegacyTimeout', settings.legacyTimeoutMs);
+    setValue('scanRestPort', settings.restPort);
+    setValue('scanGrpcPort', settings.grpcPort);
+    setValue('scanLegacyPort', settings.legacyPort);
     setValue('scanRestSockets', settings.restSocketsPerDevice);
     $('#scanRestKeepAlive').checked = Boolean(settings.restKeepAlive);
     $('#scanUsername').value = settings.username;
     $('#scanPassword').value = settings.password || '';
-    $('#scanPassword').placeholder = settings.passwordConfigured ? 'Сохранённый пароль' : 'Пароль не задан';
-    $('#scanClearPassword').checked = false; $('#scanPassword').disabled = false;
+    $('#scanPassword').placeholder = settings.passwordConfigured
+      ? 'Сохранённый пароль'
+      : 'Пароль не задан';
+    $('#scanClearPassword').checked = false;
+    $('#scanPassword').disabled = false;
     const reveal = $('#toggleScanPassword');
-    $('#scanPassword').type = 'password'; reveal.textContent = 'Показать'; reveal.setAttribute('aria-pressed', 'false');
+    $('#scanPassword').type = 'password';
+    reveal.textContent = 'Показать';
+    reveal.setAttribute('aria-pressed', 'false');
     syncProtocolControls(settings);
   };
-  if (location.hash === '#scannerSettingsPanel') { const panel = $('#scannerSettingsPanel'); panel.open = true; requestAnimationFrame(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' })); }
+  if (location.hash === '#scannerSettingsPanel') {
+    const panel = $('#scannerSettingsPanel');
+    panel.open = true;
+    requestAnimationFrame(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  }
   const form = $('#scanSettingsForm');
   const status = $('#scanSettingsStatus');
   const password = $('#scanPassword');
   const reveal = $('#toggleScanPassword');
-  form.addEventListener('input', () => { status.textContent = 'Есть изменения — нажмите «Применить настройки»'; });
+  form.addEventListener('input', () => {
+    status.textContent = 'Есть изменения — нажмите «Применить настройки»';
+  });
   reveal.addEventListener('click', () => {
     const visible = password.type === 'password';
     password.type = visible ? 'text' : 'password';
@@ -96,30 +132,61 @@
     reveal.setAttribute('aria-pressed', String(visible));
     password.focus({ preventScroll: true });
   });
-  $('#scanClearPassword').addEventListener('change', (event) => { password.disabled = event.target.checked; if (password.disabled) password.value = ''; });
-  password.addEventListener('input', () => { if ($('#scanClearPassword').checked) $('#scanClearPassword').checked = false; password.disabled = false; });
+  $('#scanClearPassword').addEventListener('change', (event) => {
+    password.disabled = event.target.checked;
+    if (password.disabled) password.value = '';
+  });
+  password.addEventListener('input', () => {
+    if ($('#scanClearPassword').checked) $('#scanClearPassword').checked = false;
+    password.disabled = false;
+  });
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const button = $('#applyScanSettings'); button.disabled = true; status.textContent = 'Сохранение…';
+    const button = $('#applyScanSettings');
+    button.disabled = true;
+    status.textContent = 'Сохранение…';
     const payload = {
-      protocol: $('#mapProtocol').value, batchSize: Number($('#scanBatchSize').value), maxScanIps: Number($('#scanMaxIps').value),
-      restTimeoutMs: Number($('#scanRestTimeout').value), grpcTimeoutMs: Number($('#scanGrpcTimeout').value),
-      legacyTimeoutMs: Number($('#scanLegacyTimeout').value), restPort: Number($('#scanRestPort').value),
-      grpcPort: Number($('#scanGrpcPort').value), legacyPort: Number($('#scanLegacyPort').value),
-      restSocketsPerDevice: Number($('#scanRestSockets').value), restKeepAlive: $('#scanRestKeepAlive').checked,
-      username: $('#scanUsername').value, password: password.value, clearPassword: $('#scanClearPassword').checked
+      protocol: $('#mapProtocol').value,
+      batchSize: Number($('#scanBatchSize').value),
+      maxScanIps: Number($('#scanMaxIps').value),
+      restTimeoutMs: Number($('#scanRestTimeout').value),
+      grpcTimeoutMs: Number($('#scanGrpcTimeout').value),
+      legacyTimeoutMs: Number($('#scanLegacyTimeout').value),
+      restPort: Number($('#scanRestPort').value),
+      grpcPort: Number($('#scanGrpcPort').value),
+      legacyPort: Number($('#scanLegacyPort').value),
+      restSocketsPerDevice: Number($('#scanRestSockets').value),
+      restKeepAlive: $('#scanRestKeepAlive').checked,
+      username: $('#scanUsername').value,
+      password: password.value,
+      clearPassword: $('#scanClearPassword').checked,
     };
     try {
-      const settings = await fetchJson('/api/scanner-settings', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
-      fill(settings); status.textContent = 'Настройки применены · перезапуск не требуется';
-    } catch (error) { status.textContent = `Не удалось применить: ${error.message}`; }
-    finally { button.disabled = false; }
+      const settings = await fetchJson('/api/scanner-settings', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      fill(settings);
+      status.textContent = 'Настройки применены · перезапуск не требуется';
+    } catch (error) {
+      status.textContent = `Не удалось применить: ${error.message}`;
+    } finally {
+      button.disabled = false;
+    }
   });
 
   window.scannerSettingsReady = (async () => {
-    try { const settings = await fetchJson('/api/scanner-settings'); fill(settings); status.textContent = 'Настройки загружены'; return settings; }
-    catch (error) { status.textContent = `Настройки не загружены: ${error.message}`; return null; }
+    try {
+      const settings = await fetchJson('/api/scanner-settings');
+      fill(settings);
+      status.textContent = 'Настройки загружены';
+      return settings;
+    } catch (error) {
+      status.textContent = `Настройки не загружены: ${error.message}`;
+      return null;
+    }
   })();
 
   async function fetchJson(url, options) {

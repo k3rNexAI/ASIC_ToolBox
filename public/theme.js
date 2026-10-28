@@ -4,7 +4,7 @@
   const themes = new Set(['original', 'soft-dark', 'mist-sage']);
   const root = document.documentElement;
 
-  const normalize = (value) => themes.has(value) ? value : 'original';
+  const normalize = (value) => (themes.has(value) ? value : 'original');
   const apply = (value, persist = false) => {
     const theme = normalize(value);
     root.dataset.theme = theme;
@@ -12,12 +12,16 @@
       select.value = theme;
     });
     if (persist) {
-      try { localStorage.setItem(storageKey, theme); } catch {}
+      try {
+        localStorage.setItem(storageKey, theme);
+      } catch {}
     }
   };
 
   let initial = 'original';
-  try { initial = normalize(localStorage.getItem(storageKey)); } catch {}
+  try {
+    initial = normalize(localStorage.getItem(storageKey));
+  } catch {}
   apply(initial);
 
   document.querySelectorAll('[data-theme-switch]').forEach((select) => {

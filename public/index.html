@@ -1,30 +1,288 @@
 <!doctype html>
 <html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ASIC ToolBox</title>
-  <link rel="icon" href="/app-icon.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="styles.css?v=1.4.5" /><link rel="stylesheet" href="/themes.css?v=1.4.5">
-<script>(function(){try{var t=localStorage.getItem('asic-toolbox-theme');if(['original','soft-dark','mist-sage'].indexOf(t)!==-1)document.documentElement.dataset.theme=t;}catch(e){}})();</script></head>
-<body>
-  <div class="app-shell">
-    <aside class="rail"><div class="brand"><a href="/" aria-label="ASIC ToolBox — главная"><strong>ASIC</strong><span>TOOLBOX</span></a></div><div class="rail-label">РАБОЧЕЕ МЕСТО</div><a class="rail-link active" href="/#overview"><span>⌂</span> Обзор</a><a class="rail-link" href="/#cods"><span>▦</span> ЦОДы</a><div id="railCods" class="rail-cod-list"><div class="rail-empty">Загрузка ЦОДов…</div></div><a class="rail-link scan-anchor" href="/#scan"><span>◉</span> Сканирование</a><a class="rail-link" href="/maps.html"><span>▦</span> Карты и результат</a><a class="rail-link" href="/map-builder.html"><span>⚙</span> Настройка карт</a><a class="rail-link" href="/#mixes"><span>◌</span> Миксы</a><a class="rail-link" href="/#board-control"><span>⚙</span> Управление платами</a><div class="rail-spacer"></div><a class="rail-link guide-link" href="/guide.html"><span>?</span> Руководство</a><div class="theme-picker"><label for="theme-switch">ТЕМА ОФОРМЛЕНИЯ</label><select id="theme-switch" data-theme-switch aria-label="Выбрать тему оформления"><option value="original">Оригинальная</option><option value="soft-dark">Тёмная</option><option value="mist-sage">Светлая</option></select></div><div class="rail-footer"><span class="dot live"></span><span>Локальный режим</span></div></aside>
-    <main>
-      <header class="topbar"><div><div class="eyebrow">ASIC TOOLBOX / ASIC FLEET</div><h1>Управление ASIC-устройствами</h1></div><div class="top-meta"><span id="lastScan">Сканирование ещё не запускалось</span><span class="pill neutral">BraiinsOS 26.08+</span><a class="button secondary backup-link" href="/api/backup/export" title="Скачать резервную копию локальных данных">Резервная копия ↓</a></div></header>
-      <section id="overview" class="hero-grid">
-        <div class="hero-card"><div class="hero-kicker"><span class="dot amber"></span> READY TO SCAN</div><h2>Соберите микс<br><em>без ручной сверки.</em></h2><p>Добавьте диапазон одного ЦОДа, найдите платы с деградацией и сразу увидите совместимые группы для микса.</p><div class="hero-note"><span>↳</span> За один запуск — только один ЦОД</div></div>
-        <div class="stats-grid"><div class="stat-card"><span>ЦОДЫ</span><strong id="statCods">0</strong><small>сохранено локально</small></div><div class="stat-card"><span>УСТРОЙСТВА</span><strong id="statDevices">—</strong><small>в последнем скане</small></div><div class="stat-card accent"><span>ПЛАТЫ В МИКСЕ</span><strong id="statBoards">—</strong><small>только 1/3 и 2/3</small></div><div class="stat-card warning"><span>ПРОВЕРИТЬ</span><strong id="statCheck">—</strong><small>0/3 или недоступны</small></div></div>
-      </section>
-      <section id="cods" class="panel"><div class="section-head"><div><div class="eyebrow">01 / INVENTORY</div><h2>ЦОДы и диапазоны</h2></div><div class="cod-head-actions"><label class="sort-control">СОРТИРОВКА ГРУПП<select id="codSort"><option value="count-desc">Сначала большие группы</option><option value="count-asc">Сначала малые группы</option><option value="name">По названию ЭЦ</option><option value="order">По порядку ЦОДов</option></select></label><button class="button primary" id="addCodBtn">+ Добавить ЦОД</button></div></div><div id="codList" class="cod-list"></div><div id="emptyCods" class="empty"><div class="empty-icon">＋</div><h3>Пока нет ЦОДов</h3><p>Добавьте первый диапазон, чтобы начать сканирование.</p></div></section>
-      <section id="scan" class="panel scan-panel"><div class="section-head"><div><div class="eyebrow">02 / DISCOVERY</div><h2>Сканирование устройств</h2></div><div class="scan-controls"><select id="codSelect" aria-label="Выберите ЦОД"><option value="">Выберите ЦОД</option></select><button class="button scan" id="scanBtn" disabled>◉ Сканировать ЦОД</button><button class="button secondary small-button hidden" id="scanCancelBtn" type="button">Отменить скан</button></div></div><div class="protocol-controls"><div class="protocol-title">ПРОТОКОЛ СКАНИРОВАНИЯ</div><label class="toggle protocol-toggle"><input type="checkbox" id="useRest" checked><span></span><strong>REST API 80</strong><small>нативный HTTP-клиент, keep-alive</small></label><label class="toggle protocol-toggle"><input type="checkbox" id="useGrpc"><span></span><strong>gRPC 50051</strong><small>быстрый Braiins Public API</small></label><label class="toggle protocol-toggle"><input type="checkbox" id="useLegacy"><span></span><strong>TCP 4028</strong><small>legacy BOSminer API</small></label><div class="protocol-note">При выборе нескольких протоколов они используются по очереди: REST → gRPC → TCP 4028. Журнал ошибок запрашивается в каждом доступном API.</div></div><div class="scan-caption"><span class="dot cyan"></span> Протокол по умолчанию задаётся в раскрываемых настройках сканирования. Несколько переключателей включают резервный fallback для текущего скана; журналы ошибок сохраняются для диагностики.</div><div id="scannerSettingsMount"></div><div class="scan-default-hint"><span>Общие настройки действуют и для сканирования в «Карты и результат».</span><a href="/maps.html#scannerSettingsPanel">Открыть настройки на странице карт</a></div><div id="scanState" class="scan-state hidden"></div></section>
-      <section id="results" class="panel results-panel"><div class="section-head"><div><div class="eyebrow">03 / HEALTH MAP</div><h2>Состояние ASIC</h2></div><div class="toggle-group"><label class="toggle"><input type="checkbox" id="showHealthy"><span></span> Показывать 3/3</label><label class="toggle"><input type="checkbox" id="showOffline"><span></span> Показывать офлайн</label></div></div><div id="scanSummary" class="scan-summary hidden"></div><div id="resultsBody" class="empty compact"><div class="empty-icon">⌁</div><h3>Результаты появятся после сканирования</h3><p>Выберите ЦОД и запустите сканирование.</p></div></section>
-      <section id="mixes" class="panel"><div class="section-head"><div><div class="eyebrow">04 / MIX BUILDER</div><h2>Расчёт миксов по модели платы</h2></div><div class="section-actions"><span id="mixScope" class="scope-badge">ЦОД не выбран</span><button id="saveMixBtn" class="button secondary small-button">▣ Сохранить списки</button><select id="saveSelect" aria-label="Сохраненные списки"><option value="">Загрузка сохранений…</option></select><button id="loadSaveBtn" class="button secondary small-button">↥ Загрузить</button></div></div><div id="mixBody" class="empty compact"><div class="empty-icon">⊕</div><h3>Микс ещё не рассчитан</h3><p>В расчёт попадут только устройства с 1/3 и 2/3 рабочих плат.</p></div></section>
-      <section id="board-control" class="panel board-control-panel"><div class="section-head"><div><div class="eyebrow">05 / BOARD CONTROL</div><h2>Мониторинг и управление платами</h2></div><span class="scope-badge">Configuration › Performance</span></div><div class="board-control-note">Неисправные ASIC автоматически отслеживаются с интервалом 5 секунд. Переключатели задают состояние каждой hashboard и режима NoPIC; изменения применяются только после Save and Apply.</div><div id="recipientControlList" class="recipient-control-list"><div class="empty compact"><h3>Реципиенты не выбраны</h3><p>После расчёта микса здесь появится список устройств.</p></div></div><div class="board-control-actions"><label class="select-all-control"><input type="checkbox" id="selectAllRecipients"><span>Выбрать всех реципиентов</span></label><span id="selectedRecipientsCount" class="selection-count">Выбрано: 0</span><span id="enableBoardsState" class="scan-state hidden"></span><button id="enableBoardsBtn" class="button primary" disabled>Save and Apply</button></div><div id="monitorPanel" class="monitor-panel hidden"><div class="monitor-head"><div><strong>Мониторинг неисправных плат</strong><small id="monitorState">После включения плат начнётся опрос устройств</small></div><div class="monitor-actions"><span class="monitor-interval">обновление каждые 5 секунд</span><button id="stopMonitorBtn" class="button secondary small-button">Остановить</button></div></div><div id="monitorList" class="monitor-list"></div></div></section>
-    </main>
-  </div>
-  <dialog id="codDialog"><form method="dialog" id="codForm"><div class="dialog-head"><div><div class="eyebrow">LOCATION</div><h2 id="codDialogTitle">Добавить ЦОД</h2></div><button type="button" class="icon-button close-cod-dialog" aria-label="Закрыть">×</button></div><label>Название ЦОДа<input name="name" placeholder="Например, Москва · зал A" required /></label><label>Группа ЭЦ<input name="ec" placeholder="Например, ЭЦ 25 МВт" /></label><div class="form-divider"><span>диапазон IPv4</span></div><div class="form-grid"><label>Начальный IP<input name="start" placeholder="10.0.12.1" required /></label><label>Конечный IP<input name="end" placeholder="10.0.12.254" required /></label></div><div class="or"><span>или CIDR</span></div><label>CIDR <input name="cidr" placeholder="10.0.12.0/24" /></label><p class="form-help">Укажите либо пару начальный/конечный IP, либо CIDR. Максимум 4096 адресов за один ЦОД.</p><div id="formError" class="form-error"></div><div class="dialog-actions"><button type="button" class="button secondary close-cod-dialog">Отмена</button><button class="button primary" value="default" id="codSubmit">Сохранить ЦОД</button></div></form></dialog>
-  <div id="toast" class="toast"></div>
-  <script src="/app.js?v=1.4.5"></script><script src="/scanner-settings.js?v=1.4.5"></script>
-<script src="/theme.js?v=1.4.5"></script></body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ASIC ToolBox</title>
+    <link rel="icon" href="/app-icon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="styles.css?v=1.4.5" />
+    <link rel="stylesheet" href="/themes.css?v=1.4.5" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('asic-toolbox-theme');
+          if (['original', 'soft-dark', 'mist-sage'].indexOf(t) !== -1)
+            document.documentElement.dataset.theme = t;
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="rail">
+        <div class="brand">
+          <a href="/" aria-label="ASIC ToolBox — главная"
+            ><strong>ASIC</strong><span>TOOLBOX</span></a
+          >
+        </div>
+        <div class="rail-label">РАБОЧЕЕ МЕСТО</div>
+        <a class="rail-link active" href="/#overview"><span>⌂</span> Обзор</a
+        ><a class="rail-link" href="/#cods"><span>▦</span> ЦОДы</a>
+        <div id="railCods" class="rail-cod-list"><div class="rail-empty">Загрузка ЦОДов…</div></div>
+        <a class="rail-link scan-anchor" href="/#scan"><span>◉</span> Сканирование</a
+        ><a class="rail-link" href="/maps.html"><span>▦</span> Карты и результат</a
+        ><a class="rail-link" href="/map-builder.html"><span>⚙</span> Настройка карт</a
+        ><a class="rail-link" href="/#mixes"><span>◌</span> Миксы</a
+        ><a class="rail-link" href="/#board-control"><span>⚙</span> Управление платами</a>
+        <div class="rail-spacer"></div>
+        <a class="rail-link guide-link" href="/guide.html"><span>?</span> Руководство</a>
+        <div class="theme-picker">
+          <label for="theme-switch">ТЕМА ОФОРМЛЕНИЯ</label
+          ><select id="theme-switch" data-theme-switch aria-label="Выбрать тему оформления">
+            <option value="original">Оригинальная</option>
+            <option value="soft-dark">Тёмная</option>
+            <option value="mist-sage">Светлая</option>
+          </select>
+        </div>
+        <div class="rail-footer"><span class="dot live"></span><span>Локальный режим</span></div>
+      </aside>
+      <main>
+        <header class="topbar">
+          <div>
+            <div class="eyebrow">ASIC TOOLBOX / ASIC FLEET</div>
+            <h1>Управление ASIC-устройствами</h1>
+          </div>
+          <div class="top-meta">
+            <span id="lastScan">Сканирование ещё не запускалось</span
+            ><span class="pill neutral">BraiinsOS 26.08+</span
+            ><a
+              class="button secondary backup-link"
+              href="/api/backup/export"
+              title="Скачать резервную копию локальных данных"
+              >Резервная копия ↓</a
+            >
+          </div>
+        </header>
+        <section id="overview" class="hero-grid">
+          <div class="hero-card">
+            <div class="hero-kicker"><span class="dot amber"></span> READY TO SCAN</div>
+            <h2>Соберите микс<br /><em>без ручной сверки.</em></h2>
+            <p>
+              Добавьте диапазон одного ЦОДа, найдите платы с деградацией и сразу увидите совместимые
+              группы для микса.
+            </p>
+            <div class="hero-note"><span>↳</span> За один запуск — только один ЦОД</div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span>ЦОДЫ</span><strong id="statCods">0</strong><small>сохранено локально</small>
+            </div>
+            <div class="stat-card">
+              <span>УСТРОЙСТВА</span><strong id="statDevices">—</strong
+              ><small>в последнем скане</small>
+            </div>
+            <div class="stat-card accent">
+              <span>ПЛАТЫ В МИКСЕ</span><strong id="statBoards">—</strong
+              ><small>только 1/3 и 2/3</small>
+            </div>
+            <div class="stat-card warning">
+              <span>ПРОВЕРИТЬ</span><strong id="statCheck">—</strong
+              ><small>0/3 или недоступны</small>
+            </div>
+          </div>
+        </section>
+        <section id="cods" class="panel">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow">01 / INVENTORY</div>
+              <h2>ЦОДы и диапазоны</h2>
+            </div>
+            <div class="cod-head-actions">
+              <label class="sort-control"
+                >СОРТИРОВКА ГРУПП<select id="codSort">
+                  <option value="count-desc">Сначала большие группы</option>
+                  <option value="count-asc">Сначала малые группы</option>
+                  <option value="name">По названию ЭЦ</option>
+                  <option value="order">По порядку ЦОДов</option>
+                </select></label
+              ><button class="button primary" id="addCodBtn">+ Добавить ЦОД</button>
+            </div>
+          </div>
+          <div id="codList" class="cod-list"></div>
+          <div id="emptyCods" class="empty">
+            <div class="empty-icon">＋</div>
+            <h3>Пока нет ЦОДов</h3>
+            <p>Добавьте первый диапазон, чтобы начать сканирование.</p>
+          </div>
+        </section>
+        <section id="scan" class="panel scan-panel">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow">02 / DISCOVERY</div>
+              <h2>Сканирование устройств</h2>
+            </div>
+            <div class="scan-controls">
+              <select id="codSelect" aria-label="Выберите ЦОД">
+                <option value="">Выберите ЦОД</option></select
+              ><button class="button scan" id="scanBtn" disabled>◉ Сканировать ЦОД</button
+              ><button
+                class="button secondary small-button hidden"
+                id="scanCancelBtn"
+                type="button"
+              >
+                Отменить скан
+              </button>
+            </div>
+          </div>
+          <div class="protocol-controls">
+            <div class="protocol-title">ПРОТОКОЛ СКАНИРОВАНИЯ</div>
+            <label class="toggle protocol-toggle"
+              ><input type="checkbox" id="useRest" checked /><span></span
+              ><strong>REST API 80</strong><small>нативный HTTP-клиент, keep-alive</small></label
+            ><label class="toggle protocol-toggle"
+              ><input type="checkbox" id="useGrpc" /><span></span><strong>gRPC 50051</strong
+              ><small>быстрый Braiins Public API</small></label
+            ><label class="toggle protocol-toggle"
+              ><input type="checkbox" id="useLegacy" /><span></span><strong>TCP 4028</strong
+              ><small>legacy BOSminer API</small></label
+            >
+            <div class="protocol-note">
+              При выборе нескольких протоколов они используются по очереди: REST → gRPC → TCP 4028.
+              Журнал ошибок запрашивается в каждом доступном API.
+            </div>
+          </div>
+          <div class="scan-caption">
+            <span class="dot cyan"></span> Протокол по умолчанию задаётся в раскрываемых настройках
+            сканирования. Несколько переключателей включают резервный fallback для текущего скана;
+            журналы ошибок сохраняются для диагностики.
+          </div>
+          <div id="scannerSettingsMount"></div>
+          <div class="scan-default-hint">
+            <span>Общие настройки действуют и для сканирования в «Карты и результат».</span
+            ><a href="/maps.html#scannerSettingsPanel">Открыть настройки на странице карт</a>
+          </div>
+          <div id="scanState" class="scan-state hidden"></div>
+        </section>
+        <section id="results" class="panel results-panel">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow">03 / HEALTH MAP</div>
+              <h2>Состояние ASIC</h2>
+            </div>
+            <div class="toggle-group">
+              <label class="toggle"
+                ><input type="checkbox" id="showHealthy" /><span></span> Показывать 3/3</label
+              ><label class="toggle"
+                ><input type="checkbox" id="showOffline" /><span></span> Показывать офлайн</label
+              >
+            </div>
+          </div>
+          <div id="scanSummary" class="scan-summary hidden"></div>
+          <div id="resultsBody" class="empty compact">
+            <div class="empty-icon">⌁</div>
+            <h3>Результаты появятся после сканирования</h3>
+            <p>Выберите ЦОД и запустите сканирование.</p>
+          </div>
+        </section>
+        <section id="mixes" class="panel">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow">04 / MIX BUILDER</div>
+              <h2>Расчёт миксов по модели платы</h2>
+            </div>
+            <div class="section-actions">
+              <span id="mixScope" class="scope-badge">ЦОД не выбран</span
+              ><button id="saveMixBtn" class="button secondary small-button">
+                ▣ Сохранить списки</button
+              ><select id="saveSelect" aria-label="Сохраненные списки">
+                <option value="">Загрузка сохранений…</option></select
+              ><button id="loadSaveBtn" class="button secondary small-button">↥ Загрузить</button>
+            </div>
+          </div>
+          <div id="mixBody" class="empty compact">
+            <div class="empty-icon">⊕</div>
+            <h3>Микс ещё не рассчитан</h3>
+            <p>В расчёт попадут только устройства с 1/3 и 2/3 рабочих плат.</p>
+          </div>
+        </section>
+        <section id="board-control" class="panel board-control-panel">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow">05 / BOARD CONTROL</div>
+              <h2>Мониторинг и управление платами</h2>
+            </div>
+            <span class="scope-badge">Configuration › Performance</span>
+          </div>
+          <div class="board-control-note">
+            Неисправные ASIC автоматически отслеживаются с интервалом 5 секунд. Переключатели задают
+            состояние каждой hashboard и режима NoPIC; изменения применяются только после Save and
+            Apply.
+          </div>
+          <div id="recipientControlList" class="recipient-control-list">
+            <div class="empty compact">
+              <h3>Реципиенты не выбраны</h3>
+              <p>После расчёта микса здесь появится список устройств.</p>
+            </div>
+          </div>
+          <div class="board-control-actions">
+            <label class="select-all-control"
+              ><input type="checkbox" id="selectAllRecipients" /><span
+                >Выбрать всех реципиентов</span
+              ></label
+            ><span id="selectedRecipientsCount" class="selection-count">Выбрано: 0</span
+            ><span id="enableBoardsState" class="scan-state hidden"></span
+            ><button id="enableBoardsBtn" class="button primary" disabled>Save and Apply</button>
+          </div>
+          <div id="monitorPanel" class="monitor-panel hidden">
+            <div class="monitor-head">
+              <div>
+                <strong>Мониторинг неисправных плат</strong
+                ><small id="monitorState">После включения плат начнётся опрос устройств</small>
+              </div>
+              <div class="monitor-actions">
+                <span class="monitor-interval">обновление каждые 5 секунд</span
+                ><button id="stopMonitorBtn" class="button secondary small-button">
+                  Остановить
+                </button>
+              </div>
+            </div>
+            <div id="monitorList" class="monitor-list"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <dialog id="codDialog">
+      <form method="dialog" id="codForm">
+        <div class="dialog-head">
+          <div>
+            <div class="eyebrow">LOCATION</div>
+            <h2 id="codDialogTitle">Добавить ЦОД</h2>
+          </div>
+          <button type="button" class="icon-button close-cod-dialog" aria-label="Закрыть">×</button>
+        </div>
+        <label
+          >Название ЦОДа<input name="name" placeholder="Например, Москва · зал A" required /></label
+        ><label>Группа ЭЦ<input name="ec" placeholder="Например, ЭЦ 25 МВт" /></label>
+        <div class="form-divider"><span>диапазон IPv4</span></div>
+        <div class="form-grid">
+          <label>Начальный IP<input name="start" placeholder="10.0.12.1" required /></label
+          ><label>Конечный IP<input name="end" placeholder="10.0.12.254" required /></label>
+        </div>
+        <div class="or"><span>или CIDR</span></div>
+        <label>CIDR <input name="cidr" placeholder="10.0.12.0/24" /></label>
+        <p class="form-help">
+          Укажите либо пару начальный/конечный IP, либо CIDR. Максимум 4096 адресов за один ЦОД.
+        </p>
+        <div id="formError" class="form-error"></div>
+        <div class="dialog-actions">
+          <button type="button" class="button secondary close-cod-dialog">Отмена</button
+          ><button class="button primary" value="default" id="codSubmit">Сохранить ЦОД</button>
+        </div>
+      </form>
+    </dialog>
+    <div id="toast" class="toast"></div>
+    <script src="/app.js?v=1.4.5"></script>
+    <script src="/scanner-settings.js?v=1.4.5"></script>
+    <script src="/theme.js?v=1.4.5"></script>
+  </body>
 </html>

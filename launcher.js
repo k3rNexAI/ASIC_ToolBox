@@ -17,7 +17,9 @@ function request(port, pathname = '/') {
     const req = http.get({ hostname: HOST, port, path: pathname, timeout: 700 }, (res) => {
       let body = '';
       res.setEncoding('utf8');
-      res.on('data', (part) => { body += part; });
+      res.on('data', (part) => {
+        body += part;
+      });
       res.on('end', () => resolve({ status: res.statusCode || 0, body }));
     });
     req.on('timeout', () => req.destroy());
@@ -29,7 +31,7 @@ async function openBrowser(url) {
   const result = await new Promise((resolve) => {
     const proc = spawn('cmd.exe', ['/d', '/s', '/c', 'start', '""', url], {
       windowsHide: true,
-      stdio: 'ignore'
+      stdio: 'ignore',
     });
     proc.once('error', () => resolve(false));
     proc.once('exit', (code) => resolve(code === 0));
@@ -45,7 +47,9 @@ function stopServer() {
 
 async function main() {
   if (!existsSync(NODE) || !existsSync(SERVER)) {
-    console.error('Файлы приложения не найдены. Распакуйте весь архив, затем запустите ASIC ToolBox.exe из его папки.');
+    console.error(
+      'Файлы приложения не найдены. Распакуйте весь архив, затем запустите ASIC ToolBox.exe из его папки.',
+    );
     process.exitCode = 1;
     return;
   }
@@ -73,14 +77,15 @@ async function main() {
     cwd: APP_ROOT,
     env: { ...process.env, HOST, PORT: String(port) },
     windowsHide: true,
-    stdio: 'ignore'
+    stdio: 'ignore',
   });
   child.once('error', (error) => {
     console.error(`Не удалось запустить сервер: ${error.message}`);
     process.exitCode = 1;
   });
   child.once('exit', (code) => {
-    if (!stopping && code !== 0) console.error(`Сервер завершился с кодом ${code ?? 'неизвестно'}.`);
+    if (!stopping && code !== 0)
+      console.error(`Сервер завершился с кодом ${code ?? 'неизвестно'}.`);
     if (!stopping && code !== 0) process.exitCode = 1;
   });
 
@@ -95,7 +100,9 @@ async function main() {
     }
     await new Promise((resolve) => setTimeout(resolve, 300));
   }
-  console.error('Сервер не ответил за 25 секунд. Проверьте файлы программы или занятость портов 4180–4199.');
+  console.error(
+    'Сервер не ответил за 25 секунд. Проверьте файлы программы или занятость портов 4180–4199.',
+  );
   stopServer();
   process.exitCode = 1;
 }
