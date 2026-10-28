@@ -2,9 +2,10 @@ import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import net from 'node:net';
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
-import { fileURLToPath } from 'node:url';
+import os from 'node:os';
+import { getAsset, isSea } from 'node:sea';
 import { Client as SshClient } from 'ssh2';
 import {
   braiinsMinerState,
@@ -14,8 +15,15 @@ import {
 } from './miner-compat.js';
 import { mixes } from './mix-algorithm.js';
 
-const ROOT = path.dirname(fileURLToPath(import.meta.url));
-const PUBLIC = path.join(ROOT, 'public');
+const SEA = isSea();
+const LEGACY_ROOT = path.dirname(path.resolve(process.argv[1] || process.execPath));
+const ROOT = SEA
+  ? process.env.ASIC_TOOLBOX_DATA_DIR ||
+    path.join(
+      process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'),
+      'ASIC ToolBox',
+    )
+  : LEGACY_ROOT;
 const STATE = path.join(ROOT, 'state.json');
 const STATE_JS = path.join(ROOT, 'state.js');
 const SAVES = path.join(ROOT, 'saves');
@@ -24,9 +32,43 @@ const PORT = Number(process.env.PORT || 4180);
 const HOST = process.env.HOST || '127.0.0.1';
 const SCAN_SETTINGS_FILE = path.join(ROOT, 'scan-settings.json');
 const execFileAsync = promisify(execFile);
-const grpcurl =
-  process.env.GRPCURL_PATH ||
-  path.join(ROOT, 'tools', process.platform === 'win32' ? 'grpcurl.exe' : 'grpcurl');
+const grpcurl = process.env.GRPCURL_PATH || path.join(LEGACY_ROOT, 'tools', 'grpcurl.exe');
+const embeddedAsset = (name) => getAsset(name);
+const resolveGrpcurl = async () => {
+  if (!SEA) return grpcurl;
+  const target = path.join(ROOT, 'runtime', 'grpcurl.exe');
+  try {
+    await fs.access(target);
+    return target;
+  } catch {}
+  await fs.mkdir(path.dirname(target), { recursive: true });
+  const temp = `${target}.${process.pid}.tmp`;
+  await fs.writeFile(temp, embeddedAsset('tools/grpcurl.exe'));
+  try {
+    await fs.rename(temp, target);
+  } catch (error) {
+    await fs.rm(temp, { force: true });
+    if (error.code !== 'EEXIST' && error.code !== 'EPERM') throw error;
+  }
+  return target;
+};
+const migratePortableData = async () => {
+  if (!SEA) return;
+  await fs.mkdir(ROOT, { recursive: true });
+  for (const name of ['state.json', 'state.js', 'maps.json', 'scan-settings.json', 'saves']) {
+    const source = path.join(path.dirname(process.execPath), name);
+    const destination = path.join(ROOT, name);
+    try {
+      await fs.access(destination);
+      continue;
+    } catch {}
+    try {
+      await fs.cp(source, destination, { recursive: true, errorOnExist: false, force: false });
+    } catch (error) {
+      if (error.code !== 'ENOENT') console.error(`Could not migrate ${name}: ${error.message}`);
+    }
+  }
+};
 const boundedInt = (value, fallback, min, max) => {
   const n = Number(value);
   return Number.isInteger(n) ? Math.max(min, Math.min(max, n)) : fallback;
@@ -540,7 +582,7 @@ const grpcCall = async (ip, service, message, token = '', signal) => {
   if (token) args.push('-H', `authorization: ${token}`);
   if (message !== undefined) args.push('-d', JSON.stringify(message));
   args.push(`${ip}:${scannerSettings.grpcPort}`, service);
-  const { stdout } = await execFileAsync(grpcurl, args, {
+  const { stdout } = await execFileAsync(await resolveGrpcurl(), args, {
     timeout: scannerSettings.grpcTimeoutMs,
     windowsHide: true,
     maxBuffer: 1024 * 1024,
@@ -1176,9 +1218,10 @@ const serveFile = async (req, res) => {
     .split('?')[0]
     .split('#')[0];
   const name = requestPath === '/' ? 'index.html' : requestPath.slice(1).replaceAll('..', '');
-  const file = path.join(PUBLIC, name);
   try {
-    const data = await fs.readFile(file);
+    const data = SEA
+      ? embeddedAsset(`public/${name}`)
+      : await fs.readFile(path.join(LEGACY_ROOT, 'public', name));
     const type = name.endsWith('.css')
       ? 'text/css'
       : name.endsWith('.js')
@@ -1220,7 +1263,11 @@ const readBackupTree = async (dir, relative = '') => {
 const buildBackup = async () => {
   let packageInfo = { name: 'asic-mix-control', version: 'unknown' };
   try {
-    packageInfo = JSON.parse(await fs.readFile(path.join(ROOT, 'package.json'), 'utf8'));
+    packageInfo = JSON.parse(
+      SEA
+        ? embeddedAsset('package.json').toString('utf8')
+        : await fs.readFile(path.join(ROOT, 'package.json'), 'utf8'),
+    );
   } catch {}
   let state = null;
   let maps = null;
@@ -1818,17 +1865,52 @@ const server = http.createServer(async (req, res) => {
     json(res, 500, { error: e.message || 'Server error' });
   }
 });
-loadScannerSettings()
-  .then(() =>
-    server.listen(PORT, HOST, () =>
-      console.log(`ASIC Mix Control listening on http://${HOST}:${PORT}`),
-    ),
-  )
+const listenOnAvailablePort = async () => {
+  const firstPort = PORT;
+  let lastError;
+  for (let port = firstPort; port < firstPort + 20; port++) {
+    try {
+      await new Promise((resolve, reject) => {
+        const onError = (error) => {
+          server.off('listening', onListening);
+          reject(error);
+        };
+        const onListening = () => {
+          server.off('error', onError);
+          resolve();
+        };
+        server.once('error', onError);
+        server.once('listening', onListening);
+        server.listen(port, HOST);
+      });
+      console.log(`ASIC ToolBox listening on http://${HOST}:${port}`);
+      if (SEA) {
+        const browser = spawn(
+          'cmd.exe',
+          ['/d', '/s', '/c', 'start', '""', `http://${HOST}:${port}`],
+          {
+            detached: true,
+            windowsHide: true,
+            stdio: 'ignore',
+          },
+        );
+        browser.unref();
+      }
+      return;
+    } catch (error) {
+      lastError = error;
+      if (error.code !== 'EADDRINUSE' && error.code !== 'EACCES') throw error;
+    }
+  }
+  throw lastError || new Error('Не найден свободный локальный порт');
+};
+Promise.resolve()
+  .then(migratePortableData)
+  .then(loadScannerSettings)
+  .then(listenOnAvailablePort)
   .catch((error) => {
     console.error(`Could not load scanner settings: ${error.message}`);
-    server.listen(PORT, HOST, () =>
-      console.log(`ASIC Mix Control listening on http://${HOST}:${PORT}`),
-    );
+    process.exitCode = 1;
   });
 process.on('exit', () => {
   restAgent.destroy();

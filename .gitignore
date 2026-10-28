@@ -1,1 +1,3 @@
 scan-settings.json*
+.sea-build/
+dist/

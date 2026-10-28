@@ -1,14 +1,28 @@
-# Windows portable launch
+# Single-file Windows executable (Node.js SEA)
 
-1. Download `ASIC_ToolBox_v1.4.5_Windows_Portable.zip` and extract the **entire** folder to a location writable by your Windows account, such as Documents. Do not run the EXE from inside the ZIP.
-2. Double-click `ASIC ToolBox.exe`. It starts the bundled local server and opens the application in your default browser. Node.js does not need to be installed separately.
-3. Keep the launcher window open while using the application. Close it to stop the local server.
+The SEA distribution is one file: `dist/ASIC ToolBox.exe`. The Node runtime, bundled server, `ssh2` dependencies, browser UI, package metadata, and `grpcurl.exe` are embedded in that executable. Users do not need Node.js and do not need to keep a runtime, `public/`, `tools/`, or application source folder beside it.
 
-The application binds only to `127.0.0.1`. If the default local port is already occupied, the launcher checks the next ports up to 4199 and opens the browser at the selected port. If the application is already running on port 4180, the launcher opens that existing instance rather than starting a duplicate.
+## Build
 
-This is a portable package rather than a system installer: it does not require administrator permissions and does not create a Windows service. The complete folder must remain together because the EXE uses the included portable Node.js runtime and app files. Keep the folder writable so the application can save its data and settings.
+Build on Windows with Node.js 22 or newer and npm:
 
-The default web browser is used to display the existing ASIC ToolBox interface. Scanner network traffic is initiated by the local server using the configured API ports and credentials.
+```powershell
+npm ci
+npm run build:windows
+```
 
+The build bundles `server.js` and its JavaScript dependencies with esbuild, creates a Node SEA blob with the current Node executable, and injects it into that same executable using `postject`. The output folder contains the distributable EXE. Building on Linux/macOS is intentionally rejected: the SEA executable must be assembled with a Windows Node binary and PE injection tooling.
 
-Version 1.4.5 can auto-detect Braiins OS via REST/gRPC and CGMiner-compatible firmware via TCP 4028. For stock/third-party firmware, the miner must expose read-only CGMiner API access to this computer; hashrate is displayed when reported by `summary` or `devs`. The port 4028 path is read-only.
+## Run and data location
+
+Copy `dist/ASIC ToolBox.exe` anywhere writable and launch it. The browser UI is served from resources embedded in the EXE. The application binds only to `127.0.0.1` and opens the local interface in the default browser.
+
+Mutable data is stored outside the installation directory, under `%LOCALAPPDATA%\ASIC ToolBox` (for example, `state.json`, `maps.json`, `scan-settings.json`, `saves/`, and `runtime\grpcurl.exe`). This is deliberate: a single-file portable executable cannot safely write its database beside itself when launched from a read-only location, and Windows requires a real file to launch the embedded `grpcurl` helper. The helper is extracted from the executable on its first gRPC request. No application/runtime/UI files need to be distributed next to the EXE.
+
+On first launch, if the EXE is placed in an existing portable app folder, the app copies any missing `state.json`, `state.js`, `maps.json`, `scan-settings.json`, and `saves/` into the user-data directory. Existing data in `%LOCALAPPDATA%` takes precedence and is never overwritten.
+
+To back up or move user data, use the application's **Export backup** function or copy `%LOCALAPPDATA%\ASIC ToolBox` while the application is stopped. The single EXE contains program assets, not private/user data.
+
+## Legacy portable package
+
+`run-windows.cmd`, `launcher.cjs`, and the existing `runtime/` and `tools/` binaries remain available for the old folder-based portable distribution. They are not used by `npm run build:windows` and are not required by the new single-file build.

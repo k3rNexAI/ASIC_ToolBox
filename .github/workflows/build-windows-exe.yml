@@ -1,0 +1,33 @@
+name: Build Windows single-file EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'server.js'
+      - 'miner-compat.js'
+      - 'mix-algorithm.js'
+      - 'public/**'
+      - 'scripts/build-sea.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/build-windows-exe.yml'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build:windows
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ASIC-ToolBox-Windows-SEA
+          path: dist/ASIC ToolBox.exe
+          if-no-files-found: error

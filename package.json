@@ -6,13 +6,16 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "format": "prettier --write launcher.js launcher.cjs miner-compat.js mix-algorithm.js server.js state.js test/*.js public/*.js public/*.html public/*.css package.json .prettierrc.json",
-    "check": "node --check server.js && node --check mix-algorithm.js && node --check test/mix-algorithm.test.js && node test/mix-algorithm.test.js && node --check miner-compat.js && node --check test/miner-compat.test.js && node test/miner-compat.test.js && node --check public/app.js && node --check public/maps.js && node --check public/scanner-settings.js && node --check public/guide.js && node --check public/theme.js && node --check launcher.cjs"
+    "build:windows": "node scripts/build-sea.mjs",
+    "format": "prettier --write launcher.js launcher.cjs miner-compat.js mix-algorithm.js server.js state.js scripts/*.mjs test/*.js public/*.js public/*.html public/*.css package.json .prettierrc.json",
+    "check": "node --check server.js && node --check scripts/build-sea.mjs && node --check mix-algorithm.js && node --check test/mix-algorithm.test.js && node test/mix-algorithm.test.js && node --check miner-compat.js && node --check test/miner-compat.test.js && node test/miner-compat.test.js && node --check public/app.js && node --check public/maps.js && node --check public/scanner-settings.js && node --check public/guide.js && node --check public/theme.js && node --check launcher.cjs"
   },
   "dependencies": {
     "ssh2": "^1.17.0"
   },
   "devDependencies": {
+    "esbuild": "^0.25.12",
+    "postject": "^1.0.0-alpha.6",
     "prettier": "^3.9.10"
   }
 }
