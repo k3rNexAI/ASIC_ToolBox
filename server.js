@@ -52,7 +52,7 @@ const defaultScannerSettings = {
   username: process.env.ASIC_USER || 'root',
   password: process.env.ASIC_PASSWORD || 'root',
 };
-/** Приводит настройки сканирования к допустимым значениям и подставляет значения по умолчанию. */
+/** Принимает объект настроек и возвращает новый объект с допустимыми значениями. Некорректные поля заменяются настройками по умолчанию, а границы чисел не дают запустить сканирование с опасными значениями. */
 const normalizeScannerSettings = (raw = {}) => ({
   protocol: validScanProtocols.has(raw.protocol) ? raw.protocol : defaultScannerSettings.protocol,
   batchSize: boundedInt(raw.batchSize, defaultScannerSettings.batchSize, 1, 256),
@@ -103,7 +103,7 @@ const retireRestAgent = (agent) => {
     retiredRestAgents.delete(agent);
   }
 };
-/** Загружает настройки, переносит старое значение протокола и обновляет REST-пул соединений. */
+/** Читает файл при запуске; при его отсутствии или ошибке остаются значения по умолчанию. Переносит старый неявный выбор протокола, затем создаёт REST-пул соединений с загруженными параметрами. */
 const loadScannerSettings = async () => {
   let stored = {};
   try {
@@ -155,7 +155,7 @@ const throwIfScanAborted = (signal) => {
   if (signal?.aborted) throw scanAbortError();
 };
 
-/** Извлекает список ЦОДов из поддерживаемых исторических форматов файла состояния. */
+/** Принимает разобранный JSON и возвращает список ЦОДов из известных старых оболочек файла. Проверяет типы вложенных значений, а при отсутствии массива возвращает пустой список. */
 const unwrapState = (parsed) => {
   if (Array.isArray(parsed)) return parsed;
   if (!parsed || typeof parsed !== 'object') return [];
@@ -170,7 +170,7 @@ const unwrapState = (parsed) => {
   if (parsed.codsById && typeof parsed.codsById === 'object') return Object.values(parsed.codsById);
   return [];
 };
-/** Разбирает JSON или обёрнутый в JS-модуль массив, сохраняя причину ошибки разбора. */
+/** Принимает содержимое state.json или старого state.js и возвращает записи с пояснением ошибки. Сначала пробует JSON, затем поддерживаемую JS-обёртку с массивом, чтобы диагностика могла показать причину повреждённого файла. */
 const parseStateText = (text) => {
   const source = String(text || '')
     .replace(/^\uFEFF/, '')
@@ -234,7 +234,7 @@ const readMaps = async () => {
     return {};
   }
 };
-/** Записывает JSON через временный файл и атомарное переименование; при необходимости делает копию. */
+/** Сохраняет значение JSON во временный файл и переименовывает его только после полной записи: при сбое основной файл не останется частичным. Параметр backup создаёт копию прежнего файла; эту функцию используют для записи состояния и карт. */
 const writeJsonAtomic = async (file, value, { backup = false } = {}) => {
   const data = `${JSON.stringify(value, null, 2)}\n`;
   const temp = `${file}.${process.pid}.${Date.now()}.tmp`;
@@ -285,7 +285,7 @@ const savePath = (relative) => {
     throw Error('Некорректный путь сохранения');
   return target;
 };
-/** Обходит сохранения; каталоги без корректного manifest пропускаются как незавершённые. */
+/** Возвращает список сохранений, у которых удалось прочитать manifest.json. Незавершённые папки пропускаются, готовые сортируются от новых к старым; результат передаётся API списка сохранений. */
 const readSavedList = async () => {
   await fs.mkdir(SAVES, { recursive: true });
   const dates = await fs.readdir(SAVES, { withFileTypes: true });
@@ -348,7 +348,7 @@ const enableAllBoards = async (recipients) =>
       }
     }),
   );
-/** Читает настройку NoPIC по SSH с тайм-аутом и поддержкой отмены сканирования. */
+/** Подключается по SSH к майнеру с адресом ip и возвращает настройку NoPIC как enabled, disabled или unknown. Вызывается при уточнении проблемной платы; таймер и отмена завершают ожидание и закрывают соединение. */
 const readNoPicExperimentalMode = (ip, signal) =>
   new Promise((resolve, reject) => {
     const client = new SshClient();
@@ -460,7 +460,7 @@ const ipToNum = (ip) => {
     : null;
 };
 const numToIp = (n) => [n >>> 24, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
-/** Разворачивает CIDR или IPv4-интервал и ограничивает объём сканирования настройкой сервера. */
+/** Принимает CIDR или начальный и конечный IPv4 и возвращает массив адресов. Проверяет формат, границы и лимит адресов, чтобы не запустить ошибочное или чрезмерно большое сканирование; используется при проверке и запуске скана. */
 const expandRange = (start, end, cidr) => {
   if (cidr) {
     const [ip, bitsText] = cidr.split('/');
@@ -491,7 +491,7 @@ const parseMinerApiJson = (text) => {
   if (start < 0 || end < start) throw Error('invalid-response');
   return JSON.parse(source.slice(start, end + 1));
 };
-/** Вызывает старый CGMiner TCP API; ответ может приходить частями и разбирается инкрементально. */
+/** Отправляет одну команду на TCP-порт старого CGMiner API и возвращает разобранный JSON. Накопленные части ответа пробуются после каждого фрагмента; сокет закрывается при ответе, ошибке, тайм-ауте или отмене. */
 const apiCall = (ip, command, timeoutMs = scannerSettings.legacyTimeoutMs, signal) =>
   new Promise((resolve, reject) => {
     const socket = net.createConnection({ host: ip, port: scannerSettings.legacyPort });
@@ -532,7 +532,7 @@ const cleanModel = (value) =>
   String(value || '')
     .replace(/^Bitmain\s+/i, '')
     .trim() || 'Модель не определена';
-/** Унифицирует gRPC-вызов через grpcurl с авторизацией, тайм-аутом и отменой. */
+/** Запускает grpcurl для одного вызова службы майнера и возвращает разобранный JSON-ответ. Переданные данные и токен добавляются в запрос; тайм-аут и сигнал отмены ограничивают время работы дочернего процесса. */
 const grpcCall = async (ip, service, message, token = '', signal) => {
   throwIfScanAborted(signal);
   const grpcSeconds = Math.max(1, Math.floor((scannerSettings.grpcTimeoutMs - 2000) / 1000));
@@ -549,7 +549,7 @@ const grpcCall = async (ip, service, message, token = '', signal) => {
   return JSON.parse(stdout || '{}');
 };
 // Native REST client: avoids spawning grpcurl for every RPC and reuses TCP sockets per ASIC.
-/** Выполняет REST-запрос с повторным использованием сокетов и безопасным выводом старого агента. */
+/** Отправляет REST-запрос майнеру и возвращает разобранный JSON. Агент повторно использует TCP-соединения; счётчик запросов не даёт уничтожить старый агент, пока тот ещё используется. Проверяются HTTP-код, размер ответа и корректность JSON. */
 const restCall = (
   ip,
   route,
@@ -624,7 +624,7 @@ const restCall = (
     if (data) req.write(data);
     req.end();
   });
-/** Собирает состояние Braiins через REST; сбой необязательной диагностики не прерывает основной опрос. */
+/** Входит в REST API Braiins и возвращает общую запись состояния устройства, плат, ошибок и охлаждения для интерфейса. Необязательные запросы журнала и охлаждения выполняются параллельно; их сбой не отменяет основной опрос. */
 const restScanOne = async (ip, signal) => {
   const login = await restCall(ip, '/api/v1/auth/login', {
     method: 'POST',
@@ -762,7 +762,7 @@ const boardHashrateGh = (board) =>
   );
 const boardIsWorking = (board) =>
   board.enabled !== false && chipCount(board) > 0 && boardHashrateGh(board) > 0;
-/** Собирает и нормализует состояние Braiins по gRPC, включая платы, ошибки и охлаждение. */
+/** Получает через gRPC состояние Braiins, платы и охлаждение и возвращает унифицированную запись устройства. Независимые запросы выполняются параллельно; недоступность журнала или охлаждения не мешает получить остальные сведения. */
 const gRPCScanOne = async (ip, signal) => {
   const login = await grpcCall(
     ip,
@@ -846,7 +846,7 @@ const gRPCScanOne = async (ip, signal) => {
             : 'healthy',
   };
 };
-/** Опрос CGMiner допускает сбои отдельных команд, но требует хотя бы одной таблицы данных. */
+/** Запрашивает таблицы старого CGMiner API и приводит их к общей записи устройства. Ошибка отдельной команды не мешает остальным, но без единой таблицы с данными устройство считается не опрошенным. */
 const scanOneLegacy = async (ip, signal, prefetchedVersion = null) => {
   const safeCall = (command) =>
     apiCall(ip, command, undefined, signal).catch((error) => {
@@ -907,7 +907,7 @@ const offlineDevice = (ip, errors) => ({
   status: 'offline',
   error: errors.join('; '),
 });
-/** Перебирает протоколы по заданной политике и возвращает результат либо offline-диагностику. */
+/** Принимает IP и порядок протоколов, пробует API по очереди и возвращает первый успешный результат. Ошибки попыток собираются для offline-диагностики; отмена передаётся вызывающему коду, а не считается отключением. */
 const scanOne = async (ip, protocol = 'rest', signal) => {
   const errors = [];
   const modes = scanProtocolOrder(protocol);
@@ -945,7 +945,7 @@ const scanOne = async (ip, protocol = 'rest', signal) => {
   }
   return offlineDevice(ip, errors);
 };
-/** Подсчитывает сводные показатели, включая недоступные адреса из полного списка. */
+/** Принимает результаты устройств и размер исходного списка IP, возвращает счётчики сводки. Отдельный totalIps позволяет учитывать адреса, по которым результат не появился. */
 const scanSummary = (devices, totalIps = devices.length) => {
   const online = devices.filter((d) => d.online);
   const ratioCounts = Object.fromEntries(
@@ -962,7 +962,7 @@ const scanSummary = (devices, totalIps = devices.length) => {
     ratioCounts,
   };
 };
-/** Параллельно сканирует уникальные IPv4; в гибридном режиме выборочно дополняет неполные ответы REST-данными. */
+/** Принимает ЦОД, IP и протокол, возвращает пакет результатов, сводку, время и признак отмены. Работники разбирают общую очередь адресов с ограниченной параллельностью, а callback сообщает вызывающему API о прогрессе. Второй проход уточняет подозрительные ответы; если REST не поддерживается, сохраняется результат первого опроса. */
 const scanIps = async (cod, ips, protocol = 'rest', onProgress = null, signal) => {
   const scanStartedAt = Date.now();
   const unique = [
@@ -1170,7 +1170,7 @@ const demoResults = (cod) => ({
     },
   ].map((device) => ({ ...device, firmwareFamily: 'braiins', firmwareName: 'Braiins OS' })),
 });
-/** Отдаёт статический файл интерфейса; отсутствующий ресурс отвечает 404. */
+/** Читает файл из public и отправляет его браузеру с типом содержимого; корневой URL означает index.html. Функция вызывается для запросов вне /api/, а отсутствующий или нечитаемый файл получает ответ 404. */
 const serveFile = async (req, res) => {
   const requestPath = String(req.url || '/')
     .split('?')[0]
@@ -1191,7 +1191,7 @@ const serveFile = async (req, res) => {
     res.end('Not found');
   }
 };
-/** Рекурсивно собирает JSON-сохранения, исключая резервные и временные файлы. */
+/** Принимает папку и возвращает вложенный объект из её JSON-файлов. Рекурсия сохраняет структуру каталогов; резервные и временные файлы исключены, а неразбираемый JSON помечается, чтобы экспорт продолжился. Используется при создании копии данных. */
 const readBackupTree = async (dir, relative = '') => {
   let entries;
   try {
@@ -1216,7 +1216,7 @@ const readBackupTree = async (dir, relative = '') => {
   }
   return result;
 };
-/** Формирует снимок данных приложения; недоступные необязательные файлы остаются пустыми. */
+/** Собирает данные приложения и сохранения в объект для API экспорта резервной копии. Каждый необязательный файл читается отдельно: отсутствие одного не отменяет экспорт остальных. */
 const buildBackup = async () => {
   let packageInfo = { name: 'asic-mix-control', version: 'unknown' };
   try {
@@ -1244,7 +1244,7 @@ const buildBackup = async () => {
       'Экспорт предназначен для резервного хранения. Перед ручным восстановлением остановите приложение и сделайте копию текущего каталога.',
   };
 };
-// API-маршруты собраны здесь; общий перехват преобразует исключения обработчиков в JSON-ответ 500.
+// Здесь запросы направляются по методу и URL к API-обработчикам; обычные страницы передаются serveFile. Общий catch превращает необработанную ошибку любого обработчика в JSON-ответ 500.
 const server = http.createServer(async (req, res) => {
   try {
     if (!req.url.startsWith('/api/')) return serveFile(req, res);

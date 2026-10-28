@@ -5,7 +5,7 @@ let cods = [],
 let pinnedRedIps = new Set(),
   recoveredRedIps = new Set();
 let collapseRedAccordionsOnNextRender = false;
-/** Выполняет JSON-запрос и преобразует HTTP-ошибку API в исключение с сообщением сервера. */
+/** Отправляет запрос к серверу и читает ответ как JSON. При HTTP-ошибке выбрасывает исключение с текстом сервера, чтобы вызывающая функция могла показать его пользователю; иначе возвращает разобранные данные. */
 const api = async (u, o) => {
   const r = await fetch(u, o),
     d = await r.json();
@@ -22,6 +22,7 @@ const isProblemDevice = (d) =>
     d.status !== 'sleep' &&
     d.ratio === '0/3',
   );
+/** Превращает значение в безопасный текст для вставки в HTML: специальные символы не дадут данным стать разметкой. Используется при построении карточек и таблиц. */
 const esc = (v) =>
   String(v ?? '').replace(
     /[&<>"']/g,
@@ -37,11 +38,13 @@ const suffix = (ip) =>
   String(ip || '')
     .split('.')
     .pop() || '—';
+/** Ищет устройство по IP и в обычном списке результатов, и внутри групп с полем devices; возвращает найденную запись или undefined. */
 const resultDevice = (results, ip) =>
   (Array.isArray(results)
     ? results.flatMap((r) => (Array.isArray(r?.devices) ? r.devices : [r]))
     : []
   ).find((d) => d?.ip === ip);
+/** Присваивает устройству имя визуального состояния по статусу, прошивке и доле работающих плат. Результат используется как CSS-класс ячейки карты. */
 const deviceState = (d) => {
   if (!d) return 'unknown';
   if (d.status === 'offline') return 'offline';
@@ -65,6 +68,7 @@ const cap = (m) => (+m.racks || 11) * (+m.shelves || 6) * (+m.devicesPerShelf ||
 const mapCells = (m) => (Array.isArray(m?.cells) ? m.cells.slice(0, cap(m)) : []);
 const mapLegend =
   '<div class="map-legend"><span class="legend healthy">Braiins 3/3</span><span class="legend degraded">Braiins 1/3 или 2/3</span><span class="legend check">Braiins 0/3</span><span class="legend sleep">SLEEP · подтверждённая пауза</span><span class="legend other-firmware">Другие прошивки · фиолетовый</span><span class="legend offline">OFFLINE</span><span class="legend empty">пусто</span></div>';
+/** Находит температуру в разных форматах ответа API и превращает её в короткую подпись. Для неизвестного значения возвращает прочерк; текстовые данные экранируются перед показом в HTML. */
 const temperatureText = (v) => {
   if (v === null || v === undefined || v === '') return '—';
   if (typeof v === 'number') return `${v}°C`;
@@ -89,7 +93,7 @@ const ipSortValue = (ip) =>
     .split('.')
     .reduce((n, x) => n * 256 + (Number(x) || 0), 0);
 const sortManualDefects = () => manualDefects.sort((a, b) => ipSortValue(a.ip) - ipSortValue(b.ip));
-/** Загружает локальный реестр неисправностей; повреждённые данные не блокируют интерфейс. */
+/** Читает сохранённый в браузере список ручных неисправностей, убирает устаревшее поле boards и сортирует IP. Если хранилище пустое или JSON повреждён, возвращает пустой список, не ломая страницу. */
 const readDefects = () => {
   try {
     return JSON.parse(localStorage.getItem(DEFECTS_KEY) || '[]')
@@ -113,7 +117,7 @@ const formatCompactHashrate = (v) => {
   return `${Math.round(n * 1000)}M`;
 };
 
-/** Строит карточки проблемных ASIC: состояние плат, телеметрию, журнал и управляющие элементы. */
+/** Получает список проблемных устройств, карту ЦОДа и его ID; возвращает HTML раскрываемой секции с карточками, телеметрией, журналом ошибок и элементами управления. События для созданных элементов подключает bindDeviceActions после отрисовки. */
 function renderRedDevices(redDevices, m, codId) {
   if (!redDevices?.length) return '';
   const cs = mapCells(m);
@@ -163,7 +167,7 @@ function renderRedDevices(redDevices, m, codId) {
   return `<details class="cod-red-devices" data-cod-id="${esc(codId)}"><summary class="cod-red-summary"><div class="cod-red-summary-left"><span class="red-warn-icon">⚠</span><strong>Проблемные ASIC: ${redDevices.length}</strong><span class="red-summary-hint">мониторинг · обновление каждые 5 секунд</span></div><span class="red-chevron">⌄</span></summary><div class="cod-red-content">${cards}</div></details>`;
 }
 
-/** Формирует карту одного ЦОДа, сопоставляя ячейки с результатами сканирования и статусами устройств. */
+/** Принимает сведения о ЦОДе, его карте и результатах скана. Для каждого места на карте находит устройство, рассчитывает класс состояния и подписи, а затем возвращает HTML карты и карточек закреплённых проблемных ASIC. */
 function mapHtml(c, m, results) {
   const rs = +m.racks || 11,
     ss = +m.shelves || 6,
@@ -203,7 +207,7 @@ function mapHtml(c, m, results) {
   const redSection = redDevices.length ? renderRedDevices(redDevices, m, c.id) : '';
   return `<article class="cod-map-result"><div class="map-cod-meta"><strong>${esc(c.name)}</strong><span>Диапазон: ${esc(c.cidr || `${c.start || ''}${c.end ? ' — ' + c.end : ''}`)}</span><span>${rs} стеллажей × ${ss} полок × ${pp} ASIC · ${cs.filter((x) => x.ip).length} IP на карте</span></div>${mapLegend}<div class="rack-map result-map" style="--rack-min-width:${Math.max(162, pp * 30 + 12)}px">${cells}</div>${redSection}</article>`;
 }
-/** Перерисовывает карты, предварительно сохраняя раскрытие секций, фокус и незавершённый ввод. */
+/** Полностью обновляет область карт из последних результатов. Перед заменой HTML запоминает раскрытые секции, настройки элементов, фокус и введённый текст, а после отрисовки восстанавливает их и заново подключает обработчики. При пустых результатах показывает заглушку и реестр неисправностей. */
 function renderFleetMaps() {
   const box = $('#fleetMaps');
   const savedRedAccordions = collapseRedAccordionsOnNextRender
@@ -298,6 +302,7 @@ function renderFleetMaps() {
   });
 }
 
+/** Создаёт список ЦОДов с флажками и связывает флажок «Все» с отдельными флажками. Меняет только состояние выбора в интерфейсе; выбранные ID позднее читает chosen для сканирования. */
 function renderChecks() {
   const box = $('#codCheckList');
   box.innerHTML = cods.length
@@ -324,6 +329,7 @@ function renderChecks() {
 
 const chosen = () => [...document.querySelectorAll('.cod-choice:checked')].map((x) => x.value);
 
+/** Собирает закреплённые устройства, которые мониторинг отметил как восстановившиеся, и показывает общий список без повторов по IP. */
 function renderGlobalRecoveredList() {
   const box = $('#globalRecoveredList');
   if (!box) return;
@@ -337,7 +343,7 @@ function renderGlobalRecoveredList() {
     ? `<section class="recovered-global-list"><header><strong>Восстановленные ASIC</strong><span>${items.length} устройств</span></header><div class="recovered-global-items">${items.map((d) => `<span class="recovered-green-chip"><b>${esc(d.ip)}</b><small>${esc(d.codName || 'ЦОД')} · ${esc(d.ratio || '')}</small></span>`).join('')}</div></section>`
     : '';
 }
-/** Сводит результаты сканов по ЦОДам и парку, отдельно учитывая офлайн, сон и время отклика. */
+/** Строит сводку по текущим результатам: считает состояния устройств и длительность сканов, а отклик суммирует только для устройств с корректным числовым временем ответа. Исключение офлайн-устройств из онлайн-подсчётов не позволяет записать их одновременно в другие категории. Вставляет итоговую таблицу в #fleetSummary. */
 function summary() {
   const rows = fleetResults.map((r) => {
     const ds = Array.isArray(r.devices) ? r.devices : [];
@@ -409,7 +415,7 @@ function summary() {
     : '';
 }
 
-/** Загружает конфигурации карт параллельно; для старых данных подставляет размеры по умолчанию. */
+/** Загружает карты для переданных ID ЦОДов параллельными запросами и сохраняет ответы в mapCache. Если у старой карты нет размеров, подставляет стандартную сетку; сбой отдельной загрузки пропускается, чтобы не прерывать остальные. */
 async function loadMaps(ids) {
   await Promise.all(
     ids.map(async (id) => {
@@ -428,7 +434,7 @@ async function loadMaps(ids) {
   );
 }
 
-/** Запускает сканирование, обновляет результаты и в любом исходе восстанавливает кнопки управления. */
+/** Сканирует выбранные ЦОДы (или загружает демо-данные), обновляет результаты и запускает периодическое наблюдение за проблемными ASIC. Блокирует кнопки на время операции; блок finally возвращает управление даже после ошибки или отмены. */
 async function scan(isDemo = false) {
   const ids = chosen();
   if (!ids.length) return toast('Отметьте хотя бы один ЦОД');
@@ -519,6 +525,7 @@ let mapPollTimer = null,
 let scanProgressTimer = null,
   scanProgressBusy = false,
   scanClientStartedAt = 0;
+/** Показывает этап и долю выполненного сканирования по данным сервера. Защищает вычисляемый процент диапазоном 0–100 и обновляет также значение доступности progressbar. */
 function drawScanProgress(progress, preparing = false) {
   const box = $('#mapScanProgress');
   if (!box) return;
@@ -542,7 +549,7 @@ function drawScanProgress(progress, preparing = false) {
   bar.style.width = `${pct}%`;
   track?.setAttribute('aria-valuenow', String(pct));
 }
-/** Опрос прогресса не допускает наложения запросов и принимает данные только текущего скана. */
+/** Запускает обновление индикатора каждые 450 мс. Флаг busy не даёт начать новый запрос, пока не завершился предыдущий; время старта отбрасывает запоздавший ответ от более старого скана. Ошибка опроса не ломает основной скан, а finally освобождает флаг для следующей попытки. */
 function startScanProgress() {
   scanClientStartedAt = Date.now();
   drawScanProgress({ completed: 0, total: 0 }, true);
@@ -560,6 +567,7 @@ function startScanProgress() {
     }
   }, 450);
 }
+/** Останавливает таймер обновления прогресса, сбрасывает флаг запроса и скрывает индикатор с кнопкой отмены. Вызывается после завершения сканирования. */
 function stopScanProgress() {
   if (scanProgressTimer) clearInterval(scanProgressTimer);
   scanProgressTimer = null;
@@ -572,10 +580,11 @@ function drawMonitoredResults() {
   renderFleetMaps();
   bindDeviceActions();
 }
-/** Генерирует HTML реестра вручную отмеченных неисправностей. */
+/** Возвращает HTML раскрываемого реестра из manualDefects. Если записей нет, показывает пояснение; кнопки печати и очистки в этом случае отключены. */
 function renderDefectRegistry() {
   return `<details class="manual-defect-registry"><summary><strong>Список неисправных устройств</strong><span class="manual-defect-count">${manualDefects.length} устройств · нажмите, чтобы развернуть</span></summary><div class="manual-defect-content"><header><div class="defect-list-actions"><button type="button" class="button secondary small-button print-defects" ${manualDefects.length ? '' : 'disabled'}>Печать списка</button><button type="button" class="button secondary small-button clear-defects" ${manualDefects.length ? '' : 'disabled'}>Очистить список неисправных</button></div></header>${manualDefects.length ? manualDefects.map((x, i) => `<div class="manual-defect-row"><b>${esc(x.ip)}</b><span>${esc(x.models || 'Модель платы не определена')}</span><p>${esc(x.defect)}</p><button type="button" class="remove-manual-defect" data-index="${i}">Убрать</button></div>`).join('') : '<p class="defect-list-empty">Список пока пуст. Введите описание на красной карточке и нажмите «Сохранить в список».</p>'}</div></details>`;
 }
+/** Заменяет реестр свежей версией после изменения списка, сохраняя его раскрытое/свёрнутое состояние и повторно подключая обработчики кнопок. */
 function refreshDefectRegistry() {
   const old = document.querySelector('.manual-defect-registry');
   if (!old) return;
@@ -604,7 +613,7 @@ function bindDefectRegistryActions() {
       }),
   );
 }
-/** Открывает страницу печатных этикеток и сообщает, если браузер заблокировал новое окно. */
+/** Открывает отдельное окно с этикетками из сохранённого списка и запускает печать после загрузки страницы. Проверка пустого списка и блокировки окна предотвращает бессмысленное действие и сообщает о запрете браузера. */
 function printDefectStickers() {
   if (!manualDefects.length) return;
   const w = window.open('', '_blank', 'width=600,height=800');
@@ -614,7 +623,7 @@ function printDefectStickers() {
   );
   w.document.close();
 }
-/** Подключает обработчики к динамически созданным формам, переключателям и карточкам устройств. */
+/** Назначает действия элементам, которые renderFleetMaps каждый раз создаёт заново: сохранение дефекта и настроек плат, Resume, копирование строк журнала и другие переключатели. Сетевые действия показывают результат или ошибку и возвращают кнопки в рабочее состояние. */
 function bindDeviceActions() {
   document.querySelectorAll('.map-nopic-mode').forEach(
     (select) =>
@@ -733,7 +742,7 @@ function bindDeviceActions() {
       }),
   );
 }
-/** Обновляет закреплённые проблемные устройства и исключает из списка восстановившиеся. */
+/** Повторно проверяет закреплённые проблемные ASIC через сервер, заменяет устаревшие сведения и обновляет карту со сводкой. Параллельные вызовы блокируются флагом busy; если устройство больше не проблемное, оно убирается из наблюдения. Ошибка фонового запроса отображается, но не прекращает будущие интервальные попытки. */
 async function pollMaps() {
   if (mapPollBusy || !fleetResults.length) return;
   mapPollBusy = true;
@@ -777,7 +786,7 @@ async function pollMaps() {
   }
 }
 
-/** Загружает исходный список ЦОДов и связывает основные кнопки страницы. */
+/** При старте страницы получает список ЦОДов с сервера, рисует список и карту, затем назначает действия кнопкам сканирования и отмены. Ошибка загрузки показывается уведомлением вместо необработанного сбоя. */
 async function init() {
   try {
     cods = await api('/api/cods');

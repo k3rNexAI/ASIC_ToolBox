@@ -1,4 +1,4 @@
-// Преобразует числовые значения API в конечное число; некорректный ввод оставляет отсутствующим.
+// Приводит значение из ответа API к конечному числу. Принимает число или строку с разделителями тысяч; для пустого, неподдерживаемого либо некорректного значения возвращает null, чтобы вызывающий код мог перейти к другому источнику данных.
 const numeric = (value) => {
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
   if (typeof value !== 'string') return null;
@@ -8,14 +8,14 @@ const numeric = (value) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-/** Возвращает порядок протоколов сканирования, включая последовательный перебор для auto. */
+/** Возвращает список протоколов, которые вызывающий код должен проверить, по порядку. hybrid здесь означает только legacy; auto задаёт последовательный перебор REST, gRPC и legacy, а конкретное имя становится единственным вариантом. */
 export const scanProtocolOrder = (protocol) =>
   protocol === 'hybrid'
     ? ['legacy']
     : protocol === 'auto'
       ? ['rest', 'grpc', 'legacy']
       : [protocol];
-/** Определяет, когда для устройства нужно дополнительно запросить REST-данные плат. */
+/** Решает, стоит ли дополнительно запрашивать через REST подробности плат устройства. Возвращает true только для доступного устройства с подозрительным/неполным состоянием, исключая сон и семейство cgminer; результат позволяет вызывающему коду не делать лишний сетевой запрос для остальных устройств. */
 export const needsRestBoardDetails = (device) =>
   Boolean(
     device?.online &&
@@ -25,7 +25,7 @@ export const needsRestBoardDetails = (device) =>
     (device.ratio === '0/3' || device.status === 'check'),
   );
 
-// Порядок соответствует приоритету распознавания; множители приводят все значения к GH/s.
+// Шаблоны перечислены от наиболее предпочитаемых типов показаний к запасным. Множитель переводит найденное значение из указанной единицы в GH/s, чтобы дальше сравнивать и складывать скорости в одном формате.
 const rateFields = [
   [/^(?:GHS|GH\/S)\s*5S$/, 1],
   [/^(?:MHS|MH\/S)\s*5S$/, 1 / 1000],
@@ -43,12 +43,12 @@ const rateFields = [
   [/^(?:MHS|MH\/S)\s*5M$/, 1 / 1000],
 ];
 
-/** Извлекает хешрейт из вариантов полей CGMiner и нормализует единицы в GH/s. */
+/** Ищет скорость хеширования в строке ответа CGMiner. Сначала проверяет прямые поля, затем известные варианты названий и, наконец, общие поля с единицей в значении; возвращает неотрицательное число в GH/s или null, если данные распознать нельзя. Результат используют нормализатор устройства/платы и проверка резервных строк STATS. */
 export function cgminerHashrateGh(row) {
   if (!row || typeof row !== 'object') return null;
   const direct = numeric(row.hashrateGh ?? row.hashrate_gh ?? row.ghs);
   if (direct !== null) return Math.max(0, direct);
-  // Нормализуем названия полей один раз, чтобы принять различия в регистре и пробелах API.
+  // Подготавливаем копию ключей в едином регистре и с одним пробелом между словами: прошивки могут по-разному писать те же названия. Значения остаются исходными.
   const entries = new Map(
     Object.entries(row).map(([key, value]) => [
       key.trim().toUpperCase().replace(/\s+/g, ' '),
@@ -62,7 +62,7 @@ export function cgminerHashrateGh(row) {
       if (n !== null) return Math.max(0, n * multiplier);
     }
   }
-  // Резервный путь для общих полей, где единица измерения может входить в строковое значение.
+  // Запасной разбор для общих названий полей: единица может быть записана прямо рядом с числом (например, TH/s). Если строка не содержит единицу, число принимается как GH/s.
   for (const [key, value] of entries) {
     if (!/^(?:HASHRATE|RATE|REAL HASHRATE)$/.test(key)) continue;
     if (typeof value === 'string') {
@@ -89,7 +89,7 @@ export function cgminerHashrateGh(row) {
   return null;
 }
 
-// У разных прошивок одно и то же содержимое ответа может иметь разные имена ключей.
+// Вспомогательные чтения ниже терпимо относятся к вариантам регистра и названий полей: совместимые прошивки часто отдают одинаковые данные под разными ключами. Если массив с подходящим именем не найден, firstArray возвращает пустой массив.
 const firstArray = (obj, keys) => {
   for (const key of keys) if (Array.isArray(obj?.[key])) return obj[key];
   return [];
@@ -112,7 +112,7 @@ const chipCountOf = (row) => {
 };
 const modelOf = (row) => String(row?.Model ?? row?.model ?? row?.Name ?? row?.name ?? '').trim();
 
-/** Сводит ответы совместимого API CGMiner к общей модели устройства и его плат. */
+/** Преобразует необязательные ответы VERSION, SUMMARY, DEVS, DEVDETAILS и STATS вместе с IP/портом в единый объект майнера для остальной программы. Сопоставляет платы по ID, вычисляет скорости и состояния, а затем возвращает общие поля интерфейса; отсутствующие массивы и поля обрабатываются как пустые данные. */
 export function normalizeCgminerResult({
   ip,
   port = 4028,
@@ -126,7 +126,7 @@ export function normalizeCgminerResult({
   let devRows = firstArray(devs, ['DEVS', 'devs']).filter(isHashDevice);
   let detailRows = firstArray(details, ['DEVDETAILS', 'devdetails']).filter(isHashDevice);
   const statRows = firstArray(stats, ['STATS', 'stats']);
-  // STATS используем только как запасной источник, если нет обычных строк плат.
+  // STATS не считаем обычным списком плат: используем его как запасной источник строк только если DEVS и DEVDETAILS пусты, и берём лишь записи с распознаваемой скоростью.
   if (!devRows.length && !detailRows.length && statRows.length) {
     devRows = statRows.filter((row) => cgminerHashrateGh(row) !== null);
   }
@@ -140,7 +140,7 @@ export function normalizeCgminerResult({
   ]
     .filter(Boolean)
     .join(' ');
-  // Ограничение защищает UI от аномально длинных ответов; подробности сопоставляются по ID.
+  // Ограничиваем число отображаемых строк плат, чтобы необычно большой ответ не перегружал интерфейс. Подробные записи присоединяются по ID; если ID не совпал, берётся запись с тем же индексом.
   const rows = primary.slice(0, 16).map((device, index) => {
     const id = idOf(device, index);
     const detail =
@@ -163,7 +163,7 @@ export function normalizeCgminerResult({
   const summedRate = rows.reduce((sum, row) => sum + row.hashrateGh, 0);
   const totalHashrateGh = totalRateFromSummary ?? (summedRate || 0);
   const hasBoardData = rows.length > 0;
-  // При отсутствии данных о платах сохраняем общий хешрейт отдельной условной строкой.
+  // Если API сообщил общую скорость, но не дал строк плат, создаём условную строку для отображения этой скорости. Она не означает, что плата действительно обнаружена; это различие учитывается ниже при подсчёте плат.
   if (!rows.length) {
     rows.push({
       number: 1,
@@ -187,7 +187,7 @@ export function normalizeCgminerResult({
     versionText,
   );
   const firmwareFamily = bos ? 'braiins' : otherFirmware ? 'cgminer' : 'unknown';
-  // Для неизвестной прошивки суммарный хешрейт не доказывает наличие обнаруженных плат.
+  // Для неизвестного семейства прошивки один лишь общий хешрейт не подтверждает наличие плат. Поэтому не засчитываем условную строку как плату и не объявляем её работающей; распознанный cgminer сохраняет прежнюю совместимую трактовку.
   const summaryOnlyUnknown = !hasBoardData && firmwareFamily !== 'cgminer';
   const totalBoards = summaryOnlyUnknown ? 0 : rows.length;
   const activeCount = summaryOnlyUnknown ? 0 : rows.filter((row) => row.working).length;
@@ -244,7 +244,7 @@ export function normalizeCgminerResult({
   };
 }
 
-// Рекурсивно собирает и ключи, и значения: прошивки часто кодируют состояние в разных вложенных полях.
+// Рекурсивно собирает текстовые/числовые значения и названия ключей из вложенного объекта или массива. Это позволяет искать сигналы состояния даже тогда, когда прошивка поместила их на разную глубину или в имя поля.
 const flattenState = (value, output = []) => {
   if (typeof value === 'string' || typeof value === 'number') output.push(String(value));
   else if (Array.isArray(value)) value.forEach((item) => flattenState(item, output));
@@ -257,7 +257,7 @@ const flattenState = (value, output = []) => {
   return output;
 };
 
-/** Определяет состояние майнера Braiins по разнородным полям и вложенным ответам. */
+/** Определяет состояние майнера по нескольким возможным полям ответа Braiins, включая вложенные объекты. Возвращает sleep, stopped, stopping, starting, running или unknown; этот результат использует нормализатор для выбора общего статуса майнера. */
 export function braiinsMinerState(details = {}) {
   const hints = [
     details,
@@ -271,13 +271,13 @@ export function braiinsMinerState(details = {}) {
     details.miner_state,
     details.minerState,
   ].filter((x) => x !== undefined && x !== null);
-  // Приводим camelCase, дефисы и подчёркивания к словам для устойчивого поиска состояний.
+  // Объединяем подсказки в текст и приводим варианты записи имён к сопоставимым словам: например, camelCase, дефисы и подчёркивания не должны мешать поиску состояния.
   const words = flattenState(hints)
     .join(' ')
     .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
     .toLowerCase()
     .replace(/[_-]+/g, ' ');
-  // Сначала проверяем паузу/сон, чтобы эти сигналы не трактовались как обычное running-состояние.
+  // Сначала ищем сон и паузу: в ответе могут одновременно присутствовать общие слова о работе, но явная пауза важнее. Остальные состояния проверяются ниже в порядке приоритета.
   if (
     /\bsleep(?:ing)?\b|\bsuspend(?:ed|ing)?\b|\bstandby\b|\bpaus(?:e|ed|ing)\b|mining paused by user|user requested pause/.test(
       words,

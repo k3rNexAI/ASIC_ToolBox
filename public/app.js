@@ -14,8 +14,9 @@ const toast = (msg) => {
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2600);
 };
+// Вызывается обработчиками интерфейса для всех запросов к серверу; возвращает разобранные данные или выбрасывает ошибку.
 const api = async (url, options) => {
-  // Единая точка вызова API: ошибки сервера преобразуются в исключения для вызывающего кода.
+  // Общая обёртка для HTTP-запросов: отправляет запрос, читает JSON и возвращает данные вызывающему коду. Если сервер ответил ошибкой, выбрасывает исключение с его сообщением, чтобы обработчик мог показать его пользователю.
   const res = await fetch(url, options);
   const data = await res.json();
   if (!res.ok) throw Error(data.error || 'Ошибка запроса');
@@ -24,7 +25,7 @@ const api = async (url, options) => {
 const rangeLabel = (c) => c.cidr || `${c.start}${c.end && c.end !== c.start ? ` — ${c.end}` : ''}`;
 let editingCodId = null;
 let codSort = 'count-desc';
-/** Группирует ЦОДы по энергокомплексу и применяет выбранный порядок сортировки. */
+/** Собирает список ЦОДов в группы по энергокомплексу и сортирует сами группы по выбранному режиму. Возвращает пары [название группы, список ЦОДов]; renderCods использует их для построения интерфейса. */
 function groupedCods() {
   const groups = new Map();
   cods.forEach((c) => {
@@ -41,6 +42,7 @@ function groupedCods() {
   else entries.sort((a, b) => b[1].length - a[1].length || firstOrder(a[1]) - firstOrder(b[1]));
   return entries;
 }
+// Перерисовывает список ЦОДов, выпадающий список и кнопки действий по текущему массиву cods. Обработчики кликов назначаются заново, потому что HTML списка заменяется целиком.
 function renderCods() {
   $('#statCods').textContent = cods.length;
   $('#emptyCods').style.display = cods.length ? 'none' : 'block';
@@ -136,7 +138,7 @@ async function moveCod(id, direction) {
   if (index < 0 || target < 0 || target >= cods.length) return;
   const ids = cods.map((c) => c.id);
   [ids[index], ids[target]] = [ids[target], ids[index]];
-  // Локальный порядок обновляется только после подтверждения нового порядка сервером.
+  // Сначала отправляем новый порядок на сервер и лишь по успешному ответу заменяем локальный список: при ошибке экран не показывает порядок, который сервер не сохранил.
   try {
     cods = await api('/api/cods/reorder', {
       method: 'POST',
@@ -157,12 +159,13 @@ function selectCod(id) {
   if (typeof updateProtocolControls === 'function') updateProtocolControls();
 }
 function escapeHtml(v) {
-  // Значения API и устройств вставляются в HTML-шаблоны, поэтому их нужно экранировать.
+  // Перед вставкой внешнего текста в HTML заменяет специальные символы на безопасные текстовые формы, чтобы они не стали разметкой или исполняемым кодом.
   return String(v).replace(
     /[&<>"']/g,
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[c],
   );
 }
+// По полям устройства выбирает HTML-метку состояния; текст ошибки и журнал экранируются перед вставкой в разметку.
 function statusChip(d) {
   const title = d.error ? ` title="${escapeHtml(d.error)}"` : '';
   const logs = [...(d.errorLogs || [])];
@@ -202,7 +205,7 @@ const boardRows = (d) =>
     })
     .join('');
 const localScanSummary = () => {
-  // Резервный подсчёт используется, когда сервер не прислал готовую сводку.
+  // Запасной подсчёт по уже загруженным устройствам нужен, если ответ сервера не содержит готовой сводки. Возвращает те же основные числа, которые отображает renderScanSummary.
   const online = devices.filter((d) => d.online);
   const ratioCounts = Object.fromEntries(
     ['3/3', '2/3', '1/3', '0/3'].map((ratio) => [
@@ -230,6 +233,7 @@ function renderScanSummary() {
   $('#scanSummary').innerHTML =
     `<div class="summary-heading"><strong>Итог сканирования</strong><small>Оффлайн-устройства не входят в распределение по платам</small></div><div class="summary-grid"><div class="summary-item"><span>Всего IP</span><b>${s.totalIps}</b></div><div class="summary-item good"><span>Удалось просканировать</span><b>${s.scannedIps}</b></div><div class="summary-item idle"><span>В простое, не офлайн</span><b>${s.idleIps}</b></div><div class="summary-item healthy"><span>3/3</span><b>${c['3/3'] || 0}</b></div><div class="summary-item degraded"><span>2/3</span><b>${c['2/3'] || 0}</b></div><div class="summary-item degraded"><span>1/3</span><b>${c['1/3'] || 0}</b></div><div class="summary-item check"><span>0/3</span><b>${c['0/3'] || 0}</b></div></div>`;
 }
+// Обновляет сводные счётчики и таблицу устройств. Флажки скрывают здоровые или офлайн-устройства только в таблице, не удаляя их из исходного списка devices.
 function renderResults() {
   const visible = devices.filter(
     (d) =>
@@ -270,10 +274,11 @@ const labelPayload = (d, role) => ({
     'Модель платы не определена',
   failed: d.failedBoards?.length ? `HB ${d.failedBoards.join(', ')}` : 'HB —',
 });
+// Принимает уже подготовленные данные этикеток, открывает отдельное окно и печатает их; пустой список и блокировка окна обрабатываются до записи документа.
 function printLabelEntries(entries) {
   if (!entries.length) return toast('Нет устройств для печати');
   const w = window.open('', '_blank', 'width=600,height=800');
-  // Блокировка всплывающих окон не прерывает интерфейс: сообщаем пользователю причину.
+  // Окно печати открывается браузером; если всплывающие окна запрещены, window.open вернёт пустое значение, поэтому показываем понятное сообщение и прекращаем печать.
   if (!w) return toast('Браузер заблокировал окно печати');
   w.document.write(
     `<!doctype html><html><head><meta charset="utf-8"><title>Этикетки</title><style>@page{size:58mm auto;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif}.label{width:58mm;min-height:32mm;padding:2.5mm 3mm 2mm;border-bottom:1px dashed #999;page-break-after:always;position:relative}.label-head{display:flex;justify-content:space-between;align-items:flex-start;gap:2mm}.ip{font-size:14pt;font-weight:800;letter-spacing:0;white-space:nowrap;line-height:1.05}.role{font-size:12pt;font-weight:800;text-align:right;line-height:1.1;word-wrap:break-word}.models{font-size:9pt;font-weight:700;line-height:1.1;margin-top:3mm;max-width:52mm;word-wrap:break-word}.failed{font-size:14pt;font-weight:800;line-height:1.1;margin-top:3mm}.hint{display:none}@media screen{body{background:#eee}.label{background:#fff;margin:8px auto;box-shadow:0 1px 5px #999}}@media print{.label:last-child{page-break-after:auto}}</style></head><body>${entries
@@ -298,6 +303,7 @@ function printGroup(m) {
     ...donors.map((d) => labelPayload(d, 'donor')),
   ]);
 }
+// Показывает рассчитанные группы доноров и реципиентов и связывает кнопки печати с соответствующими группами.
 function renderMixes() {
   if (!mixes.length) {
     $('#mixBody').className = 'empty compact';
@@ -340,7 +346,7 @@ $('#codForm').onsubmit = async (e) => {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(e.target));
   if (data.cidr) {
-    // CIDR и явный диапазон — взаимоисключающие способы задания адресов.
+    // Если задана сеть в формате CIDR, убираем границы явного диапазона: сервер получает только один выбранный способ задания адресов.
     data.start = '';
     data.end = '';
   }
@@ -374,7 +380,7 @@ const selectedProtocol = () => {
   const legacy = $('#useLegacy').checked;
   const selected = [rest, grpc, legacy].filter(Boolean).length;
   if (!selected) return null;
-  // Несколько отмеченных протоколов означают автоматический fallback между ними.
+  // Возвращает выбранный режим для запроса сканирования: null означает, что ничего не выбрано, а несколько флажков включают автоматический переход между протоколами при неудаче.
   if (selected > 1) return 'auto';
   if (legacy && window.appliedScanSettings?.protocol === 'hybrid') return 'hybrid';
   return rest ? 'rest' : grpc ? 'grpc' : 'legacy';
@@ -391,6 +397,7 @@ const protocolLabel = (protocol) => {
           ? `TCP ${settings.legacyPort || 4028}`
           : `REST → gRPC → TCP ${settings.legacyPort || 4028} fallback`;
 };
+// Синхронизирует кнопку сканирования с выбором ЦОДа, протокола и текущим состоянием запроса.
 function updateProtocolControls() {
   const protocol = selectedProtocol();
   $('#scanBtn').disabled = scanRunning || !selectedCod || !protocol;
@@ -405,7 +412,7 @@ $('#useLegacy').onchange = updateProtocolControls;
 $('#showHealthy').onchange = renderResults;
 $('#showOffline').onchange = renderResults;
 $('#scanBtn').onclick = async () => {
-  // Дожидаемся применения настроек, чтобы запрос не ушёл с устаревшим протоколом.
+  // Настройки сканера могут применяться асинхронно. Ждём их завершения, чтобы следующий запрос использовал актуальные параметры.
   await window.scannerSettingsReady;
   if (!selectedCod || scanRunning) return;
   const protocol = selectedProtocol();
@@ -428,7 +435,7 @@ $('#scanBtn').onclick = async () => {
       body: JSON.stringify({ codId: selectedCod.id, protocol }),
     });
     devices = data.devices;
-    // Реципиенты берутся из миксов, но офлайн-устройства исключаются из доступных целей.
+    // Из ответа сохраняем сводку (или рассчитываем её локально) и обновлённые миксы; список целей для последующих действий строим отдельно, исключая устройства без связи.
     scanStats = data.scanSummary || localScanSummary();
     mixes = data.mixes;
     const lists = currentMixLists();
@@ -448,7 +455,7 @@ $('#scanBtn').onclick = async () => {
     $('#scanState').textContent = `Ошибка: ${err.message}`;
     toast(err.message);
   } finally {
-    // Сброс состояния выполняется и после ошибки, чтобы сканирование можно было повторить.
+    // Блок finally срабатывает и при успехе, и при ошибке запроса: возвращаем интерфейс из режима сканирования и снова вычисляем доступность кнопки.
     scanRunning = false;
     $('#scanCancelBtn').classList.add('hidden');
     $('#scanCancelBtn').disabled = false;
@@ -467,7 +474,7 @@ $('#scanCancelBtn').onclick = async () => {
   }
 };
 const uniqueDevices = (items) => [
-  // Map дедуплицирует устройства по IP, оставляя последнее полученное состояние.
+  // Удаляет записи без IP и объединяет повторы по IP; Map оставляет для каждого адреса последнее состояние. Возвращает массив для дальнейших расчётов и отображения.
   ...new Map(items.filter((d) => d?.ip).map((d) => [d.ip, d])).values(),
 ];
 const isOnlineDevice = (d) => d?.online !== false && d?.status !== 'offline';
@@ -487,6 +494,7 @@ let monitorTimer = null;
 let monitorBusy = false;
 let monitorRunning = false;
 const expandedMonitorLogs = new Set();
+// Сверяет выбранные IP с доступными реципиентами и обновляет счётчик, чекбоксы и доступность действия.
 function syncRecipientSelection() {
   const all = uniqueDevices(activeRecipients);
   const selected = all.filter((d) => selectedRecipientIps.has(d.ip));
@@ -494,7 +502,7 @@ function syncRecipientSelection() {
   $('#selectedRecipientsCount').textContent = `Выбрано: ${selected.length}`;
   const selectAll = $('#selectAllRecipients');
   if (selectAll) {
-    // indeterminate показывает частичный выбор, не сводимый к checked/unchecked.
+    // У чекбокса «выбрать все» есть третье состояние: indeterminate показывает, что отмечена только часть устройств.
     selectAll.checked = Boolean(all.length && selected.length === all.length);
     selectAll.indeterminate = Boolean(selected.length && selected.length < all.length);
   }
@@ -507,6 +515,7 @@ function monitorLogEntryHtml(value) {
   const match = text.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?)\s*[—-]?\s*(.*)$/);
   return `<div class="map-log-entry"><span class="map-log-marker">›</span>${match ? `<time class="map-log-time">${escapeHtml(match[1])}</time><span class="map-log-message">${escapeHtml(match[2])}</span>` : `<span class="map-log-message">${escapeHtml(text)}</span>`}</div>`;
 }
+// Перерисовывает список устройств под мониторингом и назначает переключатели журналов после замены HTML.
 function renderMonitorList() {
   const list = $('#monitorList');
   if (!list) return;
@@ -538,6 +547,7 @@ function renderMonitorList() {
   );
 }
 
+// Останавливает периодический таймер и обновляет состояние панели; вызывается кнопкой остановки и при необходимости из логики мониторинга.
 function stopMonitoring(message = 'Мониторинг остановлен') {
   if (monitorTimer) {
     clearInterval(monitorTimer);
@@ -550,7 +560,7 @@ function stopMonitoring(message = 'Мониторинг остановлен') {
   if (state) state.textContent = message;
 }
 async function runMonitorPoll() {
-  // Не допускаем параллельных запросов, если предыдущий опрос ещё не завершился.
+  // Таймер запускает опросы периодически, но медленный сетевой запрос может ещё идти. Флаг busy пропускает такой запуск, чтобы запросы не накладывались друг на друга.
   if (!monitorRunning || monitorBusy) return;
   monitorBusy = true;
   try {
@@ -579,13 +589,14 @@ async function runMonitorPoll() {
     if (state)
       state.textContent = `Последнее обновление: ${new Date(data.checkedAt).toLocaleTimeString('ru-RU')} · ${monitorTargets.length} проблемных ASIC`;
   } catch (e) {
-    // Ошибка отдельного цикла отображается пользователю, но не останавливает будущие опросы.
+    // Ошибка текущего сетевого опроса показывается в панели; флаг занятости сбросится в finally, поэтому следующий запуск таймера сможет повторить запрос.
     const state = $('#monitorState');
     if (state) state.textContent = `Ошибка: ${e.message}`;
   } finally {
     monitorBusy = false;
   }
 }
+// Формирует начальный список проблемных устройств, сразу запускает первый опрос и далее повторяет его раз в пять секунд.
 function startMonitoring() {
   monitorTargets = uniqueDevices(devices).filter(
     (d) =>
@@ -602,6 +613,7 @@ function startMonitoring() {
   monitorTimer = setInterval(runMonitorPoll, 5000);
 }
 
+// Строит список доступных реципиентов, сгруппированный по моделям плат, и назначает обработчики выбора отдельных устройств и групп.
 function renderRecipientControl() {
   const all = uniqueDevices(activeRecipients);
   activeRecipients = all;
@@ -639,6 +651,7 @@ function renderRecipientControl() {
   );
   syncRecipientSelection();
 }
+// Запрашивает у сервера сохранённые наборы и обновляет список выбора; при сетевой ошибке оставляет понятный вариант «сохранений нет».
 async function refreshSavedSets() {
   try {
     savedSets = await api('/api/saves');
@@ -703,11 +716,12 @@ $('#loadSaveBtn').onclick = async () => {
     toast(e.message);
   }
 };
+// Принимает выбранные устройства, отправляет серверу включение трёх плат каждого и показывает общий результат, включая отдельные ошибки устройств.
 async function performEnableBoards(recipients, scopeLabel = 'неисправных ASIC') {
   const selected = uniqueDevices(recipients);
   if (!selected.length) return toast('Нет устройств для применения');
   const configs = selected.map((d) => ({
-    // Для отсутствующих плат назначаются их индексные идентификаторы 0–2.
+    // Запрос конфигурации должен содержать три платы: если сведений о плате нет, используем её позиционный ID (0, 1 или 2), иначе сохраняем ID из данных устройства.
     ip: d.ip,
     boards: Array.from({ length: 3 }, (_, i) => ({
       id: d.boards?.[i]?.id ?? String(i),
@@ -755,7 +769,7 @@ const ipNum = (ip) => {
   const p = String(ip || '')
     .split('.')
     .map(Number);
-  // Проверка октетов отсекает некорректные IPv4 до преобразования в число.
+  // IPv4 состоит ровно из четырёх целых октетов 0–255. Проверяем это до вычисления числового адреса; при неверном вводе возвращаем null, а не ошибочное число.
   return p.length === 4 && p.every((n) => Number.isInteger(n) && n >= 0 && n < 256)
     ? ((p[0] * 256 + p[1]) * 256 + p[2]) * 256 + p[3]
     : null;
@@ -776,12 +790,13 @@ function mapCellsForGrid() {
   const rows = Number($('#mapRows').value) || 4;
   const count = cols * rows;
   const existing = Array.isArray(mapData?.cells) ? mapData.cells : [];
-  // При изменении размеров сохраняются имеющиеся ячейки, недостающие создаются пустыми.
+  // Подгоняет массив ячеек под текущий размер сетки: уже заполненные позиции сохраняются, новые получают номер и пустой IP. Лишние позиции не попадают в результат.
   return Array.from({ length: count }, (_, i) => existing[i] || { slot: i + 1, ip: '' });
 }
 function mapDeviceStatus(ip) {
   return fleetResults.flatMap((x) => x.devices || []).find((d) => d.ip === ip);
 }
+// Отображает карту ячеек ЦОДа и связывает каждую ячейку с редактированием IP; статус берётся из последних результатов сканирования.
 function renderMapGrid() {
   const grid = $('#mapGrid');
   if (!mapData) {
@@ -837,6 +852,7 @@ function renderMapGrid() {
   $('#mapSummary').textContent =
     `${cod?.name || mapData.name} · ${cols} × ${rows} · заполнено ${cells.filter((x) => x.ip).length} из ${cells.length}`;
 }
+// Загружает карту указанного ЦОДа; пустой ID очищает текущую карту, а ошибка запроса выводится через уведомление.
 async function loadMap(codId) {
   if (!codId) {
     mapData = null;
@@ -852,7 +868,7 @@ async function loadMap(codId) {
 }
 function generateMap() {
   if (!mapData) return toast('Выберите ЦОД');
-  // Границы размеров ограничивают тяжёлые схемы и не дают создать сетку нулевого размера.
+  // Ограничиваем ввод допустимыми размерами и подставляем значения по умолчанию, если поле пустое или нечисловое; это предотвращает пустую или чрезмерно большую сетку.
   const cols = Math.max(1, Math.min(40, Number($('#mapColumns').value) || 11));
   const rows = Math.max(1, Math.min(20, Number($('#mapRows').value) || 4));
   mapData.columns = cols;
@@ -860,6 +876,7 @@ function generateMap() {
   mapData.cells = Array.from({ length: cols * rows }, (_, i) => ({ slot: i + 1, ip: '' }));
   renderMapGrid();
 }
+// Отправляет текущие размеры и ячейки карты серверу; после успешного сохранения использует возвращённую версию карты.
 async function saveMap() {
   if (!mapData) return toast('Выберите ЦОД');
   try {
@@ -878,6 +895,7 @@ async function saveMap() {
     toast(e.message);
   }
 }
+// Перерисовывает результаты общего сканирования по ЦОДам и обновляет статусы на карте.
 function renderFleetResults() {
   const box = $('#fleetScanList');
   if (!box) return;
@@ -894,7 +912,7 @@ function renderFleetResults() {
   renderMapGrid();
 }
 async function scanAllCods() {
-  // Общий скан запускается после применения настроек сканера.
+  // Ждём завершения применения настроек, прежде чем запускать общий сетевой запрос для всех ЦОДов.
   await window.scannerSettingsReady;
   if (!cods.length) return toast('Нет ЦОДов для сканирования');
   const button = $('#scanAllBtn');
@@ -929,7 +947,7 @@ if ($('#mapGenerateBtn')) $('#mapGenerateBtn').onclick = generateMap;
 if ($('#mapSaveBtn')) $('#mapSaveBtn').onclick = saveMap;
 if ($('#scanAllBtn')) $('#scanAllBtn').onclick = scanAllCods;
 async function init() {
-  // Начальная загрузка подготавливает ЦОДы и зависимые от них элементы интерфейса.
+  // Загружает ЦОДы с сервера, затем обновляет зависящие от них элементы и сохранённые наборы. Ошибки загрузки показываются уведомлением, чтобы приложение не завершалось молча.
   try {
     cods = await api('/api/cods');
     renderCods();
