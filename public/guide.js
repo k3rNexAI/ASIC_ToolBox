@@ -1,3 +1,4 @@
+/** Экранирует HTML-значимые символы перед вставкой данных API в разметку. */
 const safe = (v) =>
   String(v ?? '').replace(
     /[&<>"']/g,
@@ -7,6 +8,7 @@ const safe = (v) =>
   const box = document.querySelector('#railCods');
   if (box) {
     try {
+      // Сгруппировать ЦОДы по коду ЕС; записи без указанной группы попадут в общий раздел.
       const r = await fetch('/api/cods');
       const cods = await r.json();
       const groups = new Map();
@@ -23,12 +25,14 @@ const safe = (v) =>
           )
           .join('') || '<div class="rail-empty">Нет ЦОДов</div>';
     } catch {
+      // Не прерывать инициализацию оглавления, если API недоступен или вернул некорректный ответ.
       box.innerHTML = '<div class="rail-empty">Список ЦОДов недоступен</div>';
     }
   }
   const toc = [...document.querySelectorAll('.guide-toc a')],
     sections = toc.map((a) => document.querySelector(a.getAttribute('href'))).filter(Boolean);
   if ('IntersectionObserver' in window) {
+    // Подсвечивать пункт по секции, наиболее заметной в заданной полосе просмотра.
     const io = new IntersectionObserver(
       (entries) => {
         const active = entries

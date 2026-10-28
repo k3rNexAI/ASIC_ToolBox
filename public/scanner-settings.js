@@ -58,12 +58,15 @@
       </form>
     </details>`;
 
+  /** Заполняет поле настроек, если соответствующий элемент присутствует в DOM. */
   const setValue = (id, value) => {
     const el = $(`#${id}`);
     if (el) el.value = value;
   };
+  /** Синхронизирует производные переключатели и подписи протоколов с выбранным режимом. */
   const syncProtocolControls = (settings) => {
     const selected = settings.protocol;
+    // Режим auto включает все механизмы, а отдельные режимы — только свой протокол.
     const checked =
       selected === 'auto'
         ? { useRest: true, useGrpc: true, useLegacy: true }
@@ -85,8 +88,10 @@
       const strong = $(`#${id}`)?.parentElement?.querySelector('strong');
       if (strong) strong.textContent = text;
     }
+    // Сообщаем остальным компонентам, что применённый набор настроек обновился.
     window.dispatchEvent(new CustomEvent('scanner-settings-applied', { detail: settings }));
   };
+  /** Отображает полученные настройки и возвращает пароль в безопасное маскированное состояние. */
   const fill = (settings) => {
     window.appliedScanSettings = settings;
     setValue('mapProtocol', settings.protocol);
@@ -113,6 +118,7 @@
     reveal.setAttribute('aria-pressed', 'false');
     syncProtocolControls(settings);
   };
+  // При переходе по якорю раскрываем панель и прокручиваем к ней после отрисовки кадра.
   if (location.hash === '#scannerSettingsPanel') {
     const panel = $('#scannerSettingsPanel');
     panel.open = true;
@@ -141,6 +147,7 @@
     password.disabled = false;
   });
 
+  // Сохраняем значения формы одним запросом; интерфейс блокируется до завершения операции.
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const button = $('#applyScanSettings');
@@ -171,12 +178,14 @@
       fill(settings);
       status.textContent = 'Настройки применены · перезапуск не требуется';
     } catch (error) {
+      // Ошибка остаётся в статусной строке, а finally в любом случае разблокирует кнопку.
       status.textContent = `Не удалось применить: ${error.message}`;
     } finally {
       button.disabled = false;
     }
   });
 
+  // Публикуем Promise начальной загрузки, чтобы другие части страницы могли дождаться настроек.
   window.scannerSettingsReady = (async () => {
     try {
       const settings = await fetchJson('/api/scanner-settings');
@@ -184,11 +193,13 @@
       status.textContent = 'Настройки загружены';
       return settings;
     } catch (error) {
+      // Возвращаем null при сбое: страница остаётся доступной, а причина видна пользователю.
       status.textContent = `Настройки не загружены: ${error.message}`;
       return null;
     }
   })();
 
+  /** Выполняет JSON-запрос и преобразует HTTP-ошибки в понятное исключение для вызывающего кода. */
   async function fetchJson(url, options) {
     const response = await fetch(url, options);
     const data = await response.json();

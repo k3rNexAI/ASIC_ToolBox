@@ -12,6 +12,11 @@ const BASE_PORT = Number(process.env.PORT || 4180);
 let child = null;
 let stopping = false;
 
+/**
+ * Проверяет локальный HTTP-эндпоинт и возвращает статус с телом ответа.
+ * Ошибки соединения и тайм-ауты считаются отсутствием ответа, чтобы вызывающий код
+ * мог отличить занятый порт от свободного без прерывания запуска.
+ */
 function request(port, pathname = '/') {
   return new Promise((resolve) => {
     const req = http.get({ hostname: HOST, port, path: pathname, timeout: 700 }, (res) => {
@@ -27,6 +32,7 @@ function request(port, pathname = '/') {
   });
 }
 
+/** Открывает адрес через стандартный обработчик URL в Windows. */
 async function openBrowser(url) {
   const result = await new Promise((resolve) => {
     const proc = spawn('cmd.exe', ['/d', '/s', '/c', 'start', '""', url], {
@@ -39,12 +45,14 @@ async function openBrowser(url) {
   return result;
 }
 
+/** Останавливает дочерний сервер один раз при завершении или ошибке запуска. */
 function stopServer() {
   if (!child || child.killed || stopping) return;
   stopping = true;
   child.kill();
 }
 
+/** Проверяет комплектность приложения, выбирает порт, запускает сервер и ждёт готовности. */
 async function main() {
   if (!existsSync(NODE) || !existsSync(SERVER)) {
     console.error(
@@ -54,7 +62,7 @@ async function main() {
     return;
   }
 
-  // Reuse the local app if this launcher is started a second time.
+  // Повторное открытие лаунчера использует уже работающий экземпляр, не запуская второй сервер.
   const current = await request(BASE_PORT);
   if (current?.status === 200 && current.body.includes('ASIC ToolBox')) {
     await openBrowser(`http://${HOST}:${BASE_PORT}`);
@@ -64,6 +72,7 @@ async function main() {
   let port = BASE_PORT;
   for (; port < BASE_PORT + 20; port++) {
     const occupied = await request(port);
+    // Ошибка подключения означает, что на этом порту нет отвечающего локального сервиса.
     if (!occupied) break;
   }
   if (port >= BASE_PORT + 20) {
@@ -89,6 +98,7 @@ async function main() {
     if (!stopping && code !== 0) process.exitCode = 1;
   });
 
+  // Ожидание ограничено, чтобы при неудачном старте не оставлять лаунчер зависшим.
   const deadline = Date.now() + 25000;
   while (Date.now() < deadline) {
     if (child.exitCode !== null) break;

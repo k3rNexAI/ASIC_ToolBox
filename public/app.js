@@ -15,6 +15,7 @@ const toast = (msg) => {
   setTimeout(() => el.classList.remove('show'), 2600);
 };
 const api = async (url, options) => {
+  // Единая точка вызова API: ошибки сервера преобразуются в исключения для вызывающего кода.
   const res = await fetch(url, options);
   const data = await res.json();
   if (!res.ok) throw Error(data.error || 'Ошибка запроса');
@@ -23,6 +24,7 @@ const api = async (url, options) => {
 const rangeLabel = (c) => c.cidr || `${c.start}${c.end && c.end !== c.start ? ` — ${c.end}` : ''}`;
 let editingCodId = null;
 let codSort = 'count-desc';
+/** Группирует ЦОДы по энергокомплексу и применяет выбранный порядок сортировки. */
 function groupedCods() {
   const groups = new Map();
   cods.forEach((c) => {
@@ -134,6 +136,7 @@ async function moveCod(id, direction) {
   if (index < 0 || target < 0 || target >= cods.length) return;
   const ids = cods.map((c) => c.id);
   [ids[index], ids[target]] = [ids[target], ids[index]];
+  // Локальный порядок обновляется только после подтверждения нового порядка сервером.
   try {
     cods = await api('/api/cods/reorder', {
       method: 'POST',
@@ -154,6 +157,7 @@ function selectCod(id) {
   if (typeof updateProtocolControls === 'function') updateProtocolControls();
 }
 function escapeHtml(v) {
+  // Значения API и устройств вставляются в HTML-шаблоны, поэтому их нужно экранировать.
   return String(v).replace(
     /[&<>"']/g,
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[c],
@@ -198,6 +202,7 @@ const boardRows = (d) =>
     })
     .join('');
 const localScanSummary = () => {
+  // Резервный подсчёт используется, когда сервер не прислал готовую сводку.
   const online = devices.filter((d) => d.online);
   const ratioCounts = Object.fromEntries(
     ['3/3', '2/3', '1/3', '0/3'].map((ratio) => [
@@ -268,6 +273,7 @@ const labelPayload = (d, role) => ({
 function printLabelEntries(entries) {
   if (!entries.length) return toast('Нет устройств для печати');
   const w = window.open('', '_blank', 'width=600,height=800');
+  // Блокировка всплывающих окон не прерывает интерфейс: сообщаем пользователю причину.
   if (!w) return toast('Браузер заблокировал окно печати');
   w.document.write(
     `<!doctype html><html><head><meta charset="utf-8"><title>Этикетки</title><style>@page{size:58mm auto;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif}.label{width:58mm;min-height:32mm;padding:2.5mm 3mm 2mm;border-bottom:1px dashed #999;page-break-after:always;position:relative}.label-head{display:flex;justify-content:space-between;align-items:flex-start;gap:2mm}.ip{font-size:14pt;font-weight:800;letter-spacing:0;white-space:nowrap;line-height:1.05}.role{font-size:12pt;font-weight:800;text-align:right;line-height:1.1;word-wrap:break-word}.models{font-size:9pt;font-weight:700;line-height:1.1;margin-top:3mm;max-width:52mm;word-wrap:break-word}.failed{font-size:14pt;font-weight:800;line-height:1.1;margin-top:3mm}.hint{display:none}@media screen{body{background:#eee}.label{background:#fff;margin:8px auto;box-shadow:0 1px 5px #999}}@media print{.label:last-child{page-break-after:auto}}</style></head><body>${entries
@@ -334,6 +340,7 @@ $('#codForm').onsubmit = async (e) => {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(e.target));
   if (data.cidr) {
+    // CIDR и явный диапазон — взаимоисключающие способы задания адресов.
     data.start = '';
     data.end = '';
   }
@@ -367,6 +374,7 @@ const selectedProtocol = () => {
   const legacy = $('#useLegacy').checked;
   const selected = [rest, grpc, legacy].filter(Boolean).length;
   if (!selected) return null;
+  // Несколько отмеченных протоколов означают автоматический fallback между ними.
   if (selected > 1) return 'auto';
   if (legacy && window.appliedScanSettings?.protocol === 'hybrid') return 'hybrid';
   return rest ? 'rest' : grpc ? 'grpc' : 'legacy';
@@ -397,6 +405,7 @@ $('#useLegacy').onchange = updateProtocolControls;
 $('#showHealthy').onchange = renderResults;
 $('#showOffline').onchange = renderResults;
 $('#scanBtn').onclick = async () => {
+  // Дожидаемся применения настроек, чтобы запрос не ушёл с устаревшим протоколом.
   await window.scannerSettingsReady;
   if (!selectedCod || scanRunning) return;
   const protocol = selectedProtocol();
@@ -419,6 +428,7 @@ $('#scanBtn').onclick = async () => {
       body: JSON.stringify({ codId: selectedCod.id, protocol }),
     });
     devices = data.devices;
+    // Реципиенты берутся из миксов, но офлайн-устройства исключаются из доступных целей.
     scanStats = data.scanSummary || localScanSummary();
     mixes = data.mixes;
     const lists = currentMixLists();
@@ -438,6 +448,7 @@ $('#scanBtn').onclick = async () => {
     $('#scanState').textContent = `Ошибка: ${err.message}`;
     toast(err.message);
   } finally {
+    // Сброс состояния выполняется и после ошибки, чтобы сканирование можно было повторить.
     scanRunning = false;
     $('#scanCancelBtn').classList.add('hidden');
     $('#scanCancelBtn').disabled = false;
@@ -456,6 +467,7 @@ $('#scanCancelBtn').onclick = async () => {
   }
 };
 const uniqueDevices = (items) => [
+  // Map дедуплицирует устройства по IP, оставляя последнее полученное состояние.
   ...new Map(items.filter((d) => d?.ip).map((d) => [d.ip, d])).values(),
 ];
 const isOnlineDevice = (d) => d?.online !== false && d?.status !== 'offline';
@@ -482,6 +494,7 @@ function syncRecipientSelection() {
   $('#selectedRecipientsCount').textContent = `Выбрано: ${selected.length}`;
   const selectAll = $('#selectAllRecipients');
   if (selectAll) {
+    // indeterminate показывает частичный выбор, не сводимый к checked/unchecked.
     selectAll.checked = Boolean(all.length && selected.length === all.length);
     selectAll.indeterminate = Boolean(selected.length && selected.length < all.length);
   }
@@ -537,6 +550,7 @@ function stopMonitoring(message = 'Мониторинг остановлен') {
   if (state) state.textContent = message;
 }
 async function runMonitorPoll() {
+  // Не допускаем параллельных запросов, если предыдущий опрос ещё не завершился.
   if (!monitorRunning || monitorBusy) return;
   monitorBusy = true;
   try {
@@ -565,6 +579,7 @@ async function runMonitorPoll() {
     if (state)
       state.textContent = `Последнее обновление: ${new Date(data.checkedAt).toLocaleTimeString('ru-RU')} · ${monitorTargets.length} проблемных ASIC`;
   } catch (e) {
+    // Ошибка отдельного цикла отображается пользователю, но не останавливает будущие опросы.
     const state = $('#monitorState');
     if (state) state.textContent = `Ошибка: ${e.message}`;
   } finally {
@@ -692,6 +707,7 @@ async function performEnableBoards(recipients, scopeLabel = 'неисправн�
   const selected = uniqueDevices(recipients);
   if (!selected.length) return toast('Нет устройств для применения');
   const configs = selected.map((d) => ({
+    // Для отсутствующих плат назначаются их индексные идентификаторы 0–2.
     ip: d.ip,
     boards: Array.from({ length: 3 }, (_, i) => ({
       id: d.boards?.[i]?.id ?? String(i),
@@ -739,6 +755,7 @@ const ipNum = (ip) => {
   const p = String(ip || '')
     .split('.')
     .map(Number);
+  // Проверка октетов отсекает некорректные IPv4 до преобразования в число.
   return p.length === 4 && p.every((n) => Number.isInteger(n) && n >= 0 && n < 256)
     ? ((p[0] * 256 + p[1]) * 256 + p[2]) * 256 + p[3]
     : null;
@@ -759,6 +776,7 @@ function mapCellsForGrid() {
   const rows = Number($('#mapRows').value) || 4;
   const count = cols * rows;
   const existing = Array.isArray(mapData?.cells) ? mapData.cells : [];
+  // При изменении размеров сохраняются имеющиеся ячейки, недостающие создаются пустыми.
   return Array.from({ length: count }, (_, i) => existing[i] || { slot: i + 1, ip: '' });
 }
 function mapDeviceStatus(ip) {
@@ -834,6 +852,7 @@ async function loadMap(codId) {
 }
 function generateMap() {
   if (!mapData) return toast('Выберите ЦОД');
+  // Границы размеров ограничивают тяжёлые схемы и не дают создать сетку нулевого размера.
   const cols = Math.max(1, Math.min(40, Number($('#mapColumns').value) || 11));
   const rows = Math.max(1, Math.min(20, Number($('#mapRows').value) || 4));
   mapData.columns = cols;
@@ -875,6 +894,7 @@ function renderFleetResults() {
   renderMapGrid();
 }
 async function scanAllCods() {
+  // Общий скан запускается после применения настроек сканера.
   await window.scannerSettingsReady;
   if (!cods.length) return toast('Нет ЦОДов для сканирования');
   const button = $('#scanAllBtn');
@@ -909,6 +929,7 @@ if ($('#mapGenerateBtn')) $('#mapGenerateBtn').onclick = generateMap;
 if ($('#mapSaveBtn')) $('#mapSaveBtn').onclick = saveMap;
 if ($('#scanAllBtn')) $('#scanAllBtn').onclick = scanAllCods;
 async function init() {
+  // Начальная загрузка подготавливает ЦОДы и зависимые от них элементы интерфейса.
   try {
     cods = await api('/api/cods');
     renderCods();

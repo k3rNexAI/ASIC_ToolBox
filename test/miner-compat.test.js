@@ -7,6 +7,7 @@ import {
   scanProtocolOrder,
 } from '../miner-compat.js';
 
+// Порядок протоколов зависит от режима: гибридный и legacy-режимы обходят авто-перебор.
 assert.deepEqual(scanProtocolOrder('auto'), ['rest', 'grpc', 'legacy']);
 assert.deepEqual(scanProtocolOrder('hybrid'), ['legacy']);
 assert.deepEqual(scanProtocolOrder('legacy'), ['legacy']);
@@ -20,11 +21,13 @@ assert.equal(
   false,
 );
 
+// Разные единицы cgminer приводятся к GH/s; также поддерживается уже форматированная строка.
 assert.equal(cgminerHashrateGh({ 'GHS 5s': 12500 }), 12500);
 assert.equal(cgminerHashrateGh({ 'MHS 5s': 12500000 }), 12500);
 assert.equal(cgminerHashrateGh({ 'THS av': 12.5 }), 12500);
 assert.equal(cgminerHashrateGh({ hashrate: '12.5 TH/s' }), 12500);
 
+// Полная телеметрия проверяет согласование сводного хешрейта, плат и модели.
 const stock = normalizeCgminerResult({
   ip: '192.0.2.21',
   version: { VERSION: [{ CGMiner: '4.11.1', API: '3.7' }] },
@@ -51,6 +54,7 @@ assert.equal(stock.totalBoards, 3);
 assert.equal(stock.workingBoards, 3);
 assert.equal(stock.status, 'healthy');
 
+// Неисправная плата снижает долю рабочих плат и переводит майнер в degraded.
 const partialCgminer = normalizeCgminerResult({
   ip: '192.0.2.27',
   version: { VERSION: [{ CGMiner: '4.11.1', BOSminer: '0.2.0' }] },
@@ -75,6 +79,7 @@ assert.equal(partialCgminer.workingBoards, 2);
 assert.equal(partialCgminer.ratio, '2/3');
 assert.equal(partialCgminer.status, 'degraded');
 
+// Без строк устройств нормализатор сохраняет сводные данные, но не выдумывает число плат.
 const summaryOnly = normalizeCgminerResult({
   ip: '192.0.2.22',
   version: { VERSION: [{ CGMiner: 'CGMiner 4.11' }] },
@@ -87,6 +92,7 @@ assert.equal(summaryOnly.firmwareFamily, 'unknown');
 assert.equal(summaryOnly.totalBoards, 0);
 assert.equal(summaryOnly.ratio, '—');
 
+// Явное имя сторонней прошивки важнее общего признака наличия cgminer.
 const explicitOtherFirmware = normalizeCgminerResult({
   ip: '192.0.2.28',
   version: { VERSION: [{ CGMiner: '4.11.1', Firmware: 'VNish 1.2' }] },
@@ -95,6 +101,7 @@ const explicitOtherFirmware = normalizeCgminerResult({
 assert.equal(explicitOtherFirmware.firmwareFamily, 'cgminer');
 assert.equal(explicitOtherFirmware.status, 'healthy');
 
+// BOSminer может быть указан как в имени версии, так и отдельным полем VERSION.
 const braiins = normalizeCgminerResult({
   ip: '192.0.2.23',
   version: { VERSION: [{ CGMiner: 'BOSminer+ 0.2.0' }] },
@@ -107,6 +114,7 @@ const bosminerNamedVersion = normalizeCgminerResult({
   summary: { SUMMARY: [{ 'GHS 5s': 20 }] },
 });
 assert.equal(bosminerNamedVersion.firmwareFamily, 'braiins');
+// Состояние паузы определяется как из сводки, так и по строкам отдельных плат.
 const pausedBOSminer = normalizeCgminerResult({
   ip: '192.0.2.25',
   version: { VERSION: [{ CGMiner: '4.11.1', BOSminer: '0.2.0' }] },
@@ -135,6 +143,7 @@ const pausedFromDeviceRows = normalizeCgminerResult({
 assert.equal(pausedFromDeviceRows.ratio, '0/3');
 assert.equal(pausedFromDeviceRows.minerState, 'sleep');
 assert.equal(pausedFromDeviceRows.status, 'sleep');
+// Статус паузы не требует распознанного семейства прошивки.
 const pausedUnknownFirmware = normalizeCgminerResult({
   ip: '192.0.2.29',
   version: { VERSION: [{ CGMiner: '4.11.1', API: '3.7' }] },
@@ -148,6 +157,7 @@ const zeroRateBOSminer = normalizeCgminerResult({
   summary: { SUMMARY: [{ 'GHS 5s': 0, Status: 'Dead' }] },
 });
 assert.equal(zeroRateBOSminer.status, 'check');
+// Проверяем извлечение состояния из вложенного ответа Braiins и из уже нормализованного объекта.
 const pausedState = {
   detailed_status: { status: { status: { stopped: { reason: { mining_paused_by_user: {} } } } } },
 };

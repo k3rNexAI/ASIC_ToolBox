@@ -5,12 +5,14 @@ let cods = [],
 let pinnedRedIps = new Set(),
   recoveredRedIps = new Set();
 let collapseRedAccordionsOnNextRender = false;
+/** Выполняет JSON-запрос и преобразует HTTP-ошибку API в исключение с сообщением сервера. */
 const api = async (u, o) => {
   const r = await fetch(u, o),
     d = await r.json();
   if (!r.ok) throw Error(d.error || 'Ошибка');
   return d;
 };
+/** Отбирает онлайн-устройства Braiins с нулём рабочих хэш-плат для отдельного мониторинга. */
 const isProblemDevice = (d) =>
   Boolean(
     d &&
@@ -87,6 +89,7 @@ const ipSortValue = (ip) =>
     .split('.')
     .reduce((n, x) => n * 256 + (Number(x) || 0), 0);
 const sortManualDefects = () => manualDefects.sort((a, b) => ipSortValue(a.ip) - ipSortValue(b.ip));
+/** Загружает локальный реестр неисправностей; повреждённые данные не блокируют интерфейс. */
 const readDefects = () => {
   try {
     return JSON.parse(localStorage.getItem(DEFECTS_KEY) || '[]')
@@ -110,6 +113,7 @@ const formatCompactHashrate = (v) => {
   return `${Math.round(n * 1000)}M`;
 };
 
+/** Строит карточки проблемных ASIC: состояние плат, телеметрию, журнал и управляющие элементы. */
 function renderRedDevices(redDevices, m, codId) {
   if (!redDevices?.length) return '';
   const cs = mapCells(m);
@@ -159,6 +163,7 @@ function renderRedDevices(redDevices, m, codId) {
   return `<details class="cod-red-devices" data-cod-id="${esc(codId)}"><summary class="cod-red-summary"><div class="cod-red-summary-left"><span class="red-warn-icon">⚠</span><strong>Проблемные ASIC: ${redDevices.length}</strong><span class="red-summary-hint">мониторинг · обновление каждые 5 секунд</span></div><span class="red-chevron">⌄</span></summary><div class="cod-red-content">${cards}</div></details>`;
 }
 
+/** Формирует карту одного ЦОДа, сопоставляя ячейки с результатами сканирования и статусами устройств. */
 function mapHtml(c, m, results) {
   const rs = +m.racks || 11,
     ss = +m.shelves || 6,
@@ -198,6 +203,7 @@ function mapHtml(c, m, results) {
   const redSection = redDevices.length ? renderRedDevices(redDevices, m, c.id) : '';
   return `<article class="cod-map-result"><div class="map-cod-meta"><strong>${esc(c.name)}</strong><span>Диапазон: ${esc(c.cidr || `${c.start || ''}${c.end ? ' — ' + c.end : ''}`)}</span><span>${rs} стеллажей × ${ss} полок × ${pp} ASIC · ${cs.filter((x) => x.ip).length} IP на карте</span></div>${mapLegend}<div class="rack-map result-map" style="--rack-min-width:${Math.max(162, pp * 30 + 12)}px">${cells}</div>${redSection}</article>`;
 }
+/** Перерисовывает карты, предварительно сохраняя раскрытие секций, фокус и незавершённый ввод. */
 function renderFleetMaps() {
   const box = $('#fleetMaps');
   const savedRedAccordions = collapseRedAccordionsOnNextRender
@@ -331,6 +337,7 @@ function renderGlobalRecoveredList() {
     ? `<section class="recovered-global-list"><header><strong>Восстановленные ASIC</strong><span>${items.length} устройств</span></header><div class="recovered-global-items">${items.map((d) => `<span class="recovered-green-chip"><b>${esc(d.ip)}</b><small>${esc(d.codName || 'ЦОД')} · ${esc(d.ratio || '')}</small></span>`).join('')}</div></section>`
     : '';
 }
+/** Сводит результаты сканов по ЦОДам и парку, отдельно учитывая офлайн, сон и время отклика. */
 function summary() {
   const rows = fleetResults.map((r) => {
     const ds = Array.isArray(r.devices) ? r.devices : [];
@@ -402,6 +409,7 @@ function summary() {
     : '';
 }
 
+/** Загружает конфигурации карт параллельно; для старых данных подставляет размеры по умолчанию. */
 async function loadMaps(ids) {
   await Promise.all(
     ids.map(async (id) => {
@@ -420,6 +428,7 @@ async function loadMaps(ids) {
   );
 }
 
+/** Запускает сканирование, обновляет результаты и в любом исходе восстанавливает кнопки управления. */
 async function scan(isDemo = false) {
   const ids = chosen();
   if (!ids.length) return toast('Отметьте хотя бы один ЦОД');
@@ -472,6 +481,7 @@ async function scan(isDemo = false) {
     $('#lastFleetScan').textContent =
       `Последний скан: ${new Date(d.scannedAt).toLocaleString('ru-RU')}${isDemo ? ' (демо)' : ''}${d.cancelled ? ' · отменён' : ''}`;
   } catch (e) {
+    // Сообщаем об ошибке запроса; finally ниже гарантирует восстановление интерфейса.
     toast(e.message);
     $('#scanAllState').textContent = 'Ошибка';
   } finally {
@@ -532,6 +542,7 @@ function drawScanProgress(progress, preparing = false) {
   bar.style.width = `${pct}%`;
   track?.setAttribute('aria-valuenow', String(pct));
 }
+/** Опрос прогресса не допускает наложения запросов и принимает данные только текущего скана. */
 function startScanProgress() {
   scanClientStartedAt = Date.now();
   drawScanProgress({ completed: 0, total: 0 }, true);
@@ -561,6 +572,7 @@ function drawMonitoredResults() {
   renderFleetMaps();
   bindDeviceActions();
 }
+/** Генерирует HTML реестра вручную отмеченных неисправностей. */
 function renderDefectRegistry() {
   return `<details class="manual-defect-registry"><summary><strong>Список неисправных устройств</strong><span class="manual-defect-count">${manualDefects.length} устройств · нажмите, чтобы развернуть</span></summary><div class="manual-defect-content"><header><div class="defect-list-actions"><button type="button" class="button secondary small-button print-defects" ${manualDefects.length ? '' : 'disabled'}>Печать списка</button><button type="button" class="button secondary small-button clear-defects" ${manualDefects.length ? '' : 'disabled'}>Очистить список неисправных</button></div></header>${manualDefects.length ? manualDefects.map((x, i) => `<div class="manual-defect-row"><b>${esc(x.ip)}</b><span>${esc(x.models || 'Модель платы не определена')}</span><p>${esc(x.defect)}</p><button type="button" class="remove-manual-defect" data-index="${i}">Убрать</button></div>`).join('') : '<p class="defect-list-empty">Список пока пуст. Введите описание на красной карточке и нажмите «Сохранить в список».</p>'}</div></details>`;
 }
@@ -592,6 +604,7 @@ function bindDefectRegistryActions() {
       }),
   );
 }
+/** Открывает страницу печатных этикеток и сообщает, если браузер заблокировал новое окно. */
 function printDefectStickers() {
   if (!manualDefects.length) return;
   const w = window.open('', '_blank', 'width=600,height=800');
@@ -601,6 +614,7 @@ function printDefectStickers() {
   );
   w.document.close();
 }
+/** Подключает обработчики к динамически созданным формам, переключателям и карточкам устройств. */
 function bindDeviceActions() {
   document.querySelectorAll('.map-nopic-mode').forEach(
     (select) =>
@@ -719,6 +733,7 @@ function bindDeviceActions() {
       }),
   );
 }
+/** Обновляет закреплённые проблемные устройства и исключает из списка восстановившиеся. */
 async function pollMaps() {
   if (mapPollBusy || !fleetResults.length) return;
   mapPollBusy = true;
@@ -734,6 +749,7 @@ async function pollMaps() {
     const fresh = new Map((out.devices || []).map((d) => [d.ip, d]));
     for (const d of targets) {
       const n = fresh.get(d.ip);
+      // Если мониторинг не сообщил режим NoPIC, сохраняем последнее достоверное значение.
       if (
         n &&
         !['enabled', 'disabled'].includes(n.nopicMode) &&
@@ -753,6 +769,7 @@ async function pollMaps() {
     summary();
     renderFleetMaps();
   } catch (e) {
+    // Ошибка фонового опроса не останавливает цикл: следующая итерация повторит запрос.
     const st = $('#scanAllState');
     if (st) st.textContent = `Ошибка мониторинга: ${e.message}`;
   } finally {
@@ -760,6 +777,7 @@ async function pollMaps() {
   }
 }
 
+/** Загружает исходный список ЦОДов и связывает основные кнопки страницы. */
 async function init() {
   try {
     cods = await api('/api/cods');
